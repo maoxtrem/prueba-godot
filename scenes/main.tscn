@@ -1,14 +1,21 @@
 [gd_scene format=3 uid="uid://irha5a38frcd"]
 
-[ext_resource type="Script" uid="uid://cljjppibn3ol1" path="res://scripts/main.gd" id="1_sugp2"]
+[ext_resource type="Script" uid="uid://cljjppibn3ol1" path="res://scripts/main.gd" id="1_jyhfs"]
 [ext_resource type="PackedScene" uid="uid://bjvdtuivlf7n8" path="res://scenes/player/player.tscn" id="2_jyhfs"]
+[ext_resource type="PackedScene" uid="uid://clauaipkaf6j8" path="res://scenes/ui/hud.tscn" id="2_tbgi4"]
 [ext_resource type="PackedScene" uid="uid://cot48h2dhdu87" path="res://scenes/enemies/enemy.tscn" id="3_tbgi4"]
+[ext_resource type="Script" uid="uid://b2nxk6x1ab3vd" path="res://systems/waves/wave_manager.gd" id="4_tbgi4"]
 
 [node name="Main" type="Node2D" unique_id=1429946689]
-script = ExtResource("1_sugp2")
+script = ExtResource("1_jyhfs")
+
+[node name="HUD" parent="." unique_id=1296587215 instance=ExtResource("2_tbgi4")]
 
 [node name="Player" parent="." unique_id=1572066906 instance=ExtResource("2_jyhfs")]
 position = Vector2(133, 172)
 
-[node name="Enemy" parent="." unique_id=2118948593 instance=ExtResource("3_tbgi4")]
-position = Vector2(577, 162)
+[node name="EnemyContainer" type="Node2D" parent="." unique_id=1464997685]
+
+[node name="WaveManager" type="Node" parent="." unique_id=3992274]
+script = ExtResource("4_tbgi4")
+enemy_scene = ExtResource("3_tbgi4")

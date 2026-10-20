@@ -1,6 +1,7 @@
 
 extends CharacterBody2D
-
+class_name Enemy
+signal enemy_died(enemy: Node2D)
 @export var velocidad: float = 100.0
 
 
@@ -74,4 +75,5 @@ func morir() -> void:
 	velocity = Vector2.ZERO
 	set_physics_process(false)
 	recompensa.entregar_recompensa(jugador)
+	enemy_died.emit(self)
 	queue_free()

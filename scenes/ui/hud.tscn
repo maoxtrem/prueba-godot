@@ -1,0 +1,49 @@
+[gd_scene format=3 uid="uid://clauaipkaf6j8"]
+
+[ext_resource type="Script" uid="uid://dvvemrbkjnewe" path="res://scripts/ui/hud.gd" id="1_0mwgc"]
+
+[node name="HUD" type="CanvasLayer" unique_id=1296587215]
+script = ExtResource("1_0mwgc")
+
+[node name="Interface" type="Control" parent="." unique_id=872770294]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="WaveLabel" type="Label" parent="Interface" unique_id=723218804]
+layout_mode = 1
+anchors_preset = -1
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 200.0
+offset_bottom = 50.0
+text = "Oleada: 0"
+
+[node name="EnemiesLabel" type="Label" parent="Interface" unique_id=1308154435]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 55.0
+offset_right = 200.0
+offset_bottom = 85.0
+text = "Enemigos: 0"
+
+[node name="KillsLabel" type="Label" parent="Interface" unique_id=730213027]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 90.0
+offset_right = 200.0
+offset_bottom = 120.0
+text = "Eliminaciones: 0"
+
+[node name="HealthBar" type="ProgressBar" parent="Interface" unique_id=199685779]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 135.0
+offset_right = 240.0
+offset_bottom = 155.0
+value = 100.0
+show_percentage = false
