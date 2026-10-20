@@ -1,0 +1,38 @@
+[gd_scene format=3 uid="uid://bjvdtuivlf7n8"]
+
+[ext_resource type="Script" uid="uid://cu4gymvdf64uw" path="res://player.gd" id="1_onrkg"]
+[ext_resource type="Texture2D" uid="uid://bguv0y6386be6" path="res://icon.svg" id="2_i3pqv"]
+[ext_resource type="Script" uid="uid://o5aisrhj1qu2" path="res://components/health/health_component.gd" id="3_i3pqv"]
+[ext_resource type="Script" uid="uid://gsi2bltd80jl" path="res://components/movement/movement_cost_component.gd" id="4_hqtel"]
+[ext_resource type="Script" uid="uid://c8qp55jjnftol" path="res://components/combat/attack_component.gd" id="5_sweqy"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_en5gj"]
+radius = 45.0
+
+[node name="Player" type="CharacterBody2D" unique_id=1572066906 groups=["jugadores"]]
+collision_mask = 4
+script = ExtResource("1_onrkg")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1120788831]
+texture = ExtResource("2_i3pqv")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=271988852]
+shape = SubResource("CircleShape2D_en5gj")
+
+[node name="LifeBars" type="ProgressBar" parent="." unique_id=1906678769]
+offset_left = -50.0
+offset_top = -85.0
+offset_right = 50.0
+offset_bottom = -58.0
+value = 100.0
+
+[node name="HealthComponent" type="Node2D" parent="." unique_id=665983815]
+script = ExtResource("3_i3pqv")
+
+[node name="MovementCostComponent" type="Node2D" parent="." unique_id=1665160544 node_paths=PackedStringArray("health")]
+script = ExtResource("4_hqtel")
+health = NodePath("../HealthComponent")
+
+[node name="AttackComponent" type="Node2D" parent="." unique_id=977715277 node_paths=PackedStringArray("health")]
+script = ExtResource("5_sweqy")
+health = NodePath("../HealthComponent")

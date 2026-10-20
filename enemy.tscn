@@ -1,0 +1,49 @@
+[gd_scene format=3 uid="uid://cot48h2dhdu87"]
+
+[ext_resource type="Script" uid="uid://di1dirumo3bs2" path="res://enemy.gd" id="1_4gyqm"]
+[ext_resource type="Texture2D" uid="uid://bguv0y6386be6" path="res://icon.svg" id="2_qi2p4"]
+[ext_resource type="Script" uid="uid://o5aisrhj1qu2" path="res://components/health/health_component.gd" id="3_qi2p4"]
+[ext_resource type="Script" uid="uid://dhjgym7hwahvp" path="res://components/regeneration/regeneration_component.gd" id="4_iifgy"]
+[ext_resource type="Script" uid="uid://dg1lh1knahceb" path="res://components/rewards/reward_component.gd" id="5_epg4t"]
+[ext_resource type="Script" uid="uid://c8qp55jjnftol" path="res://components/combat/attack_component.gd" id="6_3yqyl"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_4gyqm"]
+radius = 45.0
+
+[node name="Enemy" type="CharacterBody2D" unique_id=2118948593 groups=["enemigos"]]
+collision_layer = 2
+collision_mask = 4
+script = ExtResource("1_4gyqm")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1743303764]
+modulate = Color(0.6114647, 0.10486672, 0.1867916, 1)
+texture = ExtResource("2_qi2p4")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1864497836]
+shape = SubResource("CircleShape2D_4gyqm")
+
+[node name="LifeBar" type="ProgressBar" parent="." unique_id=1743396391]
+offset_left = -50.0
+offset_top = -85.0
+offset_right = 50.0
+offset_bottom = -73.0
+max_value = 30.0
+show_percentage = false
+
+[node name="HealthComponent" type="Node2D" parent="." unique_id=2021824412]
+script = ExtResource("3_qi2p4")
+max_health = 30.0
+
+[node name="RegenerationComponent" type="Node2D" parent="." unique_id=2098036261 node_paths=PackedStringArray("health")]
+script = ExtResource("4_iifgy")
+health = NodePath("../HealthComponent")
+
+[node name="RewardComponent" type="Node2D" parent="." unique_id=652423055]
+script = ExtResource("5_epg4t")
+
+[node name="AttackComponent" type="Node2D" parent="." unique_id=699770667 node_paths=PackedStringArray("health")]
+script = ExtResource("6_3yqyl")
+alcance = 90.0
+costo_vida = 0.0
+tiempo_recarga = 1.0
+health = NodePath("../HealthComponent")
