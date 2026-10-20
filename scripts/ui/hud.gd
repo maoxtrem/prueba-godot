@@ -2,6 +2,8 @@
 extends CanvasLayer
 class_name GameHUD
 
+signal restart_requested
+
 # ==========================================
 # REFERENCIAS DE LA INTERFAZ
 # ==========================================
@@ -10,6 +12,8 @@ class_name GameHUD
 @onready var enemies_label: Label = $Interface/EnemiesLabel
 @onready var kills_label: Label = $Interface/KillsLabel
 @onready var health_bar: ProgressBar = $Interface/HealthBar
+@onready var game_over_panel: Panel = $Interface/GameOverPanel
+@onready var restart_button: Button = $Interface/GameOverPanel/RestartButton
 
 
 # ==========================================
@@ -24,6 +28,8 @@ var kills: int = 0
 # ==========================================
 
 func _ready() -> void:
+	restart_button.pressed.connect(_on_restart_button_pressed)
+	game_over_panel.visible = false
 	update_wave(0, 0)
 	update_enemies(0)
 	update_kills(0)
@@ -73,3 +79,12 @@ func update_kills(total: int) -> void:
 
 func register_kill() -> void:
 	update_kills(kills + 1)
+
+
+func show_game_over() -> void:
+	game_over_panel.visible = true
+	restart_button.grab_focus()
+
+
+func _on_restart_button_pressed() -> void:
+	restart_requested.emit()

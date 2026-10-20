@@ -77,3 +77,8 @@ func morir() -> void:
 	recompensa.entregar_recompensa(jugador)
 	enemy_died.emit(self)
 	queue_free()
+
+
+func detener() -> void:
+	velocity = Vector2.ZERO
+	set_physics_process(false)

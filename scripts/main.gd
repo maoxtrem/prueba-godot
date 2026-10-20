@@ -1,6 +1,14 @@
 
 extends Node2D
 
+enum GameState {
+	PLAYING,
+	GAME_OVER,
+	RESTART,
+}
+
+var game_state: GameState = GameState.PLAYING
+
 # ==========================================
 # REFERENCIAS
 # ==========================================
@@ -15,6 +23,8 @@ extends Node2D
 # ==========================================
 
 func _ready() -> void:
+	player.health.died.connect(_on_player_died)
+	hud.restart_requested.connect(_on_restart_requested)
 
 	# Conectar eventos de las oleadas
 	wave_manager.wave_started.connect(
@@ -57,3 +67,21 @@ func _ready() -> void:
 		player.health.current_health,
 		player.health.max_health
 	)
+
+
+func _on_player_died() -> void:
+	if game_state != GameState.PLAYING:
+		return
+
+	game_state = GameState.GAME_OVER
+	wave_manager.stop_waves()
+	get_tree().call_group(&"enemigos", &"detener")
+	hud.show_game_over()
+
+
+func _on_restart_requested() -> void:
+	if game_state != GameState.GAME_OVER:
+		return
+
+	game_state = GameState.RESTART
+	get_tree().reload_current_scene()

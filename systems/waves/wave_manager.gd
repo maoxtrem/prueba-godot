@@ -48,6 +48,10 @@ func _ready() -> void:
 	call_deferred("start_next_wave")
 
 
+func stop_waves() -> void:
+	wave_active = false
+
+
 # ==========================================
 # INICIAR OLEADA
 # ==========================================
