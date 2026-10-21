@@ -1,8 +1,7 @@
-[gd_resource type="Resource" script_class="WeaponStats" load_steps=4 format=3]
+[gd_resource type="Resource" script_class="WeaponStats" format=3 uid="uid://cbbtk4glgaybu"]
 
-[ext_resource type="Script" path="res://systems/equipment/weapon_stats.gd" id="1_weapon_stats"]
-
-[ext_resource type="Script" path="res://systems/equipment/weapon_cost_config.gd" id="2_cost_config"]
+[ext_resource type="Script" uid="uid://bgqlsjlp0aa1l" path="res://systems/equipment/weapon_stats.gd" id="1_weapon_stats"]
+[ext_resource type="Script" uid="uid://btugtuhfm17ma" path="res://systems/equipment/weapon_cost_config.gd" id="2_cost_config"]
 
 [sub_resource type="Resource" id="WeaponCostConfig_rusty_sword"]
 script = ExtResource("2_cost_config")
@@ -13,9 +12,7 @@ uses_durability = true
 [resource]
 script = ExtResource("1_weapon_stats")
 damage = 18.0
-health_cost = 0.0
 attack_range = 100.0
 cooldown = 0.6
-combat_type = 0
 max_durability = 80.0
 cost_config = SubResource("WeaponCostConfig_rusty_sword")

@@ -12,6 +12,7 @@ signal enemy_died(enemy: Node2D)
 
 @onready var health: HealthComponent = $HealthComponent
 @onready var barra_vida: ProgressBar = $LifeBar
+@onready var etiqueta_vida: Label = $HealthLabel
 @onready var regeneracion: RegenerationComponent = $RegenerationComponent
 @onready var recompensa: RewardComponent = $RewardComponent
 @onready var ataque: AttackComponent = $AttackComponent
@@ -69,6 +70,7 @@ func recibir_dano(cantidad: float) -> void:
 func actualizar_barra(actual: float, maxima: float) -> void:
 	barra_vida.max_value = maxima
 	barra_vida.value = actual
+	etiqueta_vida.text = "%.0f / %.0f HP" % [actual, maxima]
 
 
 func morir() -> void:

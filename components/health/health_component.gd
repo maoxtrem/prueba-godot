@@ -3,6 +3,7 @@ extends Node
 class_name HealthComponent
 
 signal health_changed(current: float, maximum: float)
+signal max_health_changed(previous: float, maximum: float)
 signal died
 
 @export var max_health: float = 100.0
@@ -26,6 +27,34 @@ func reset_health() -> void:
 	current_health = max_health
 	is_dead = false
 	health_changed.emit(current_health, max_health)
+
+
+func set_max_health(value: float, preserve_current: bool = false) -> bool:
+	if value <= 0.0 or not is_finite(value):
+		return false
+	var previous := max_health
+	max_health = value
+	if preserve_current:
+		current_health = clampf(current_health, 0.0, max_health)
+	else:
+		current_health = minf(current_health, max_health)
+	max_health_changed.emit(previous, max_health)
+	health_changed.emit(current_health, max_health)
+	return true
+
+
+func increase_max_health(amount: float, restore_amount: float = 0.0) -> bool:
+	if amount <= 0.0 or not is_finite(amount) or not is_finite(restore_amount):
+		return false
+	var previous := max_health
+	var next_max := max_health + amount
+	if not is_finite(next_max) or next_max <= 0.0:
+		return false
+	max_health = next_max
+	current_health = clampf(current_health + maxf(restore_amount, 0.0), 0.0, max_health)
+	max_health_changed.emit(previous, max_health)
+	health_changed.emit(current_health, max_health)
+	return true
 
 
 func take_damage(amount: float) -> void:

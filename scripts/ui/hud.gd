@@ -12,6 +12,7 @@ signal restart_requested
 @onready var enemies_label: Label = $Interface/StatusPanel/Margin/VBox/EnemiesLabel
 @onready var kills_label: Label = $Interface/StatusPanel/Margin/VBox/KillsLabel
 @onready var health_bar: ProgressBar = $Interface/StatusPanel/Margin/VBox/HealthBar
+@onready var health_label: Label = $Interface/StatusPanel/Margin/VBox/HealthLabel
 @onready var weapon_notice: Label = $Interface/StatusPanel/Margin/VBox/WeaponNotice
 @onready var inventory_ui: InventoryUI = $InventoryUI
 @onready var game_over_ui: GameOverUI = $GameOverUI
@@ -67,6 +68,7 @@ func update_health(
 ) -> void:
 	health_bar.max_value = maximum
 	health_bar.value = current
+	health_label.text = "%.0f / %.0f HP" % [current, maximum]
 
 
 # ==========================================

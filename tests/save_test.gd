@@ -16,6 +16,7 @@ func _run() -> void:
 	root.add_child(main_instance)
 	set_current_scene(main_instance)
 	await process_frame
+	main_instance.player.configure_debug(null)
 	var save_manager: SaveManager = main_instance.get_node("SaveManager")
 	var test_repository := JsonSaveRepository.new()
 	test_repository.save_directory = "/tmp/ultimo_refugio_save_tests"
@@ -26,6 +27,7 @@ func _run() -> void:
 	var quests: QuestManager = main_instance.get_node("QuestManager")
 	var waves: WaveManager = main_instance.get_node("WaveManager")
 	var effects: StatusEffectComponent = main_instance.get_node("Player/StatusEffectComponent")
+	inventory.clear_items()
 
 	inventory.add_item(SWORD, 2)
 	inventory.add_item(ARMOR, 1)
@@ -75,6 +77,7 @@ func _run() -> void:
 	root.add_child(restored_main)
 	set_current_scene(restored_main)
 	await process_frame
+	restored_main.player.configure_debug(null)
 	restored_main.save_manager.repository = test_repository
 	restored_main.save_manager.default_slot = "phase12_test"
 	var continued: Dictionary = restored_main.continue_saved_game()

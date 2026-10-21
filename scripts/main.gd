@@ -257,8 +257,9 @@ func restore_from_save(data: Dictionary) -> Dictionary:
 	if not upgrades.restore_levels(game.upgrades): return {"success": false, "error": "upgrade_restore_failed"}
 	if not quest_manager.restore_state(game.quests): return {"success": false, "error": "quest_restore_failed"}
 	var health_data: Dictionary = game.health
-	player_node.health.max_health = float(health_data.maximum)
-	player_node.health.current_health = float(health_data.current)
+	if not player_node.health.set_max_health(float(health_data.maximum)):
+		return {"success": false, "error": "invalid_health_maximum"}
+	player_node.health.current_health = clampf(float(health_data.current), 0.0, player_node.health.max_health)
 	player_node.health.is_dead = false
 	player_node.health.health_changed.emit(player_node.health.current_health, player_node.health.max_health)
 	if not effects_restore(game.temporary_effects): return {"success": false, "error": "effect_restore_failed"}

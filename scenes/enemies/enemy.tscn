@@ -33,6 +33,15 @@ offset_bottom = -73.0
 max_value = 30.0
 show_percentage = false
 
+[node name="HealthLabel" type="Label" parent="."]
+offset_left = -65.0
+offset_top = -112.0
+offset_right = 65.0
+offset_bottom = -88.0
+text = "30 / 30 HP"
+horizontal_alignment = 1
+mouse_filter = 2
+
 [node name="HealthComponent" type="Node2D" parent="." unique_id=2021824412]
 script = ExtResource("3_qi2p4")
 max_health = 30.0

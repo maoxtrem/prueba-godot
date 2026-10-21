@@ -15,6 +15,7 @@ var velocidad_efectiva: float
 var debug_settings: DebugSettings
 var multiplicador_velocidad_mejoras: float = 1.0
 var debug_ranged_granted: bool = false
+var debug_capacity_potions_granted: bool = false
 
 func _ready() -> void:
 	velocidad_efectiva = velocidad
@@ -94,6 +95,10 @@ func configure_debug(settings: DebugSettings) -> void:
 		inventario.add_item(bolts, 20)
 		inventario.add_item(bullets, 20)
 		debug_ranged_granted = true
+	if settings != null and settings.debug_enabled and settings.grant_test_capacity_potions and not debug_capacity_potions_granted:
+		var capacity_potion: ItemData = load("res://resources/items/vital_capacity_potion.tres")
+		inventario.add_item(capacity_potion, 10)
+		debug_capacity_potions_granted = true
 
 
 func recibir_dano(cantidad: float) -> void:

@@ -30,6 +30,8 @@ func use_item(item_id: String) -> Dictionary:
 	var applied := true
 	if data.consumable_type == ConsumableData.ConsumableType.HEAL:
 		health.heal(data.healing_amount)
+	elif data.consumable_type == ConsumableData.ConsumableType.MAX_HEALTH_INCREASE:
+		applied = health.increase_max_health(data.max_health_increase, data.max_health_increase)
 	else:
 		applied = status_effects.apply_effect(data)
 	if not applied:
@@ -59,6 +61,8 @@ func can_use_item(item_id: String) -> Dictionary:
 		return {"success": false, "reason": "invalid_consumable"}
 	if data.consumable_type == ConsumableData.ConsumableType.HEAL and health.current_health >= health.max_health:
 		return {"success": false, "reason": "health_full"}
+	if data.consumable_type == ConsumableData.ConsumableType.MAX_HEALTH_INCREASE and data.max_health_increase <= 0.0:
+		return {"success": false, "reason": "invalid_capacity_increase"}
 	if data.consumable_type == ConsumableData.ConsumableType.TEMPORARY_EFFECT and status_effects == null:
 		return {"success": false, "reason": "missing_status_component"}
 	return {"success": true, "item": item, "data": data}
