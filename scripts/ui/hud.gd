@@ -12,6 +12,7 @@ signal restart_requested
 @onready var enemies_label: Label = $Interface/StatusPanel/Margin/VBox/EnemiesLabel
 @onready var kills_label: Label = $Interface/StatusPanel/Margin/VBox/KillsLabel
 @onready var health_bar: ProgressBar = $Interface/StatusPanel/Margin/VBox/HealthBar
+@onready var weapon_notice: Label = $Interface/StatusPanel/Margin/VBox/WeaponNotice
 @onready var inventory_ui: InventoryUI = $InventoryUI
 @onready var game_over_ui: GameOverUI = $GameOverUI
 @onready var upgrade_shop: UpgradeShop = $UpgradeShop
@@ -25,6 +26,7 @@ signal restart_requested
 # ==========================================
 
 var kills: int = 0
+var ammo_manager: AmmoManager
 
 
 # ==========================================
@@ -75,6 +77,12 @@ func update_kills(total: int) -> void:
 	kills = total
 	kills_label.text = "Eliminaciones: %d" % kills
 
+func show_weapon_broken(instance: WeaponInstance) -> void:
+	if instance == null or instance.item == null:
+		return
+	weapon_notice.text = "Arma rota: %s" % instance.item.display_name
+	weapon_notice.visible = true
+
 
 # ==========================================
 # REGISTRAR ELIMINACION MANUAL
@@ -97,7 +105,7 @@ func show_upgrade_shop(upgrades: UpgradeManager, health: HealthComponent) -> voi
 	if game_over_ui.visible:
 		return
 	inventory_ui.close_inventory()
-	upgrade_shop.set_sources(upgrades, health)
+	upgrade_shop.set_sources(upgrades, health, ammo_manager)
 	upgrade_shop.show_shop()
 
 
@@ -131,6 +139,12 @@ func set_consumables(consumables: ConsumableComponent) -> void:
 
 func set_weapon_upgrades(upgrades: WeaponUpgradeManager) -> void:
 	inventory_ui.set_weapon_upgrades(upgrades)
+
+func set_weapon_repairs(repairs: WeaponRepairManager) -> void:
+	inventory_ui.set_weapon_repairs(repairs)
+
+func set_ammo_manager(manager: AmmoManager) -> void:
+	ammo_manager = manager
 
 func set_quest_manager(quests: QuestManager) -> void:
 	quest_ui.set_manager(quests)

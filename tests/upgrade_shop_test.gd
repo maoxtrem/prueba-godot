@@ -27,6 +27,7 @@ func _run() -> void:
 	_check(manager.current_state == GameManager.GameState.UPGRADE_SELECTION, "abrir tienda con B")
 	_check(paused and shop.visible, "pausar y mostrar tienda")
 	_check(shop.cards.size() == 4, "mostrar cuatro mejoras")
+	_check(shop.ammo_cards.size() == 3, "mostrar tres paquetes de munición")
 	inventory_ui.open_inventory()
 	_check(not inventory_ui.visible, "impedir inventario simultáneo")
 
@@ -37,6 +38,10 @@ func _run() -> void:
 	_check(shop.visible, "mantener tienda abierta tras comprar")
 	shop._on_buy_pressed(1)
 	_check(upgrades.get_upgrade_level("efficient_step") == 1, "permitir varias compras")
+	var ammo_health_before: float = health.current_health
+	shop.ammo_cards[0].button.emit_signal("pressed")
+	_check(main_instance.inventory.get_item_quantity("crossbow_bolt") == 10, "comprar munición desde la tienda")
+	_check(health.current_health < ammo_health_before, "cobrar HP por paquete de munición")
 
 	Input.parse_input_event(_key_event(KEY_B))
 	await process_frame

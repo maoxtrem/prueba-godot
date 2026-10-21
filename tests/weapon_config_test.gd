@@ -22,13 +22,13 @@ func _run() -> void:
 	var health_only := WeaponCostConfig.new()
 	health_only.health_cost = 3.0
 	var health_stats := _stats_with_cost(health_only, 0.0)
-	_check(health_stats.is_valid() and is_equal_approx(health_stats.get_health_cost(), 3.0), "configurar costo únicamente de HP")
+	_check(health_stats.is_valid() and health_stats.validate()["success"] and is_equal_approx(health_stats.get_health_cost(), 3.0), "configurar costo únicamente de HP")
 
 	var durability_only := WeaponCostConfig.new()
 	durability_only.durability_cost = 1.0
 	durability_only.uses_durability = true
 	var durability_stats := _stats_with_cost(durability_only, 20.0)
-	_check(durability_stats.is_valid() and durability_stats.uses_durability(), "configurar costo únicamente de durabilidad")
+	_check(durability_stats.is_valid() and durability_stats.uses_durability() and is_equal_approx(durability_stats.get_max_durability(), 20.0), "configurar costo únicamente de durabilidad")
 
 	var ammo_only := WeaponCostConfig.new()
 	ammo_only.ammo_item_id = "crossbow_bolt"
@@ -53,7 +53,7 @@ func _run() -> void:
 
 	var negative := WeaponCostConfig.new()
 	negative.health_cost = -1.0
-	_check(not negative.is_valid(), "rechazar costo de HP negativo")
+	_check(not negative.is_valid() and negative.validate()["error"] == "negative_health_cost", "rechazar costo de HP negativo con diagnóstico")
 	negative.health_cost = 0.0
 	negative.durability_cost = -1.0
 	_check(not negative.is_valid(), "rechazar costo de durabilidad negativo")
@@ -71,13 +71,13 @@ func _run() -> void:
 	var invalid_durability := WeaponCostConfig.new()
 	invalid_durability.durability_cost = 1.0
 	invalid_durability.uses_durability = true
-	_check(not _stats_with_cost(invalid_durability, 0.0).is_valid(), "rechazar durabilidad sin máximo")
+	_check(not _stats_with_cost(invalid_durability, 0.0).is_valid() and _stats_with_cost(invalid_durability, 0.0).validate()["error"] == "max_durability_required", "rechazar durabilidad sin máximo")
 
 	var legacy_conflict := WeaponCostConfig.new()
 	legacy_conflict.health_cost = 2.0
 	var conflict_stats := _stats_with_cost(legacy_conflict, 5.0)
 	conflict_stats.health_cost = 1.0
-	_check(not conflict_stats.is_valid(), "rechazar dos fuentes de costo de HP")
+	_check(not conflict_stats.is_valid() and conflict_stats.validate()["error"] == "legacy_cost_conflict", "rechazar dos fuentes de costo de HP")
 
 	_check(sword.weapon_stats.damage == 18.0 and sword.weapon_stats.attack_range == 100.0 and sword.weapon_stats.cooldown == 0.6, "conservar estadísticas de espada")
 	_check(dagger.weapon_stats.damage == 8.0 and dagger.weapon_stats.attack_range == 75.0 and dagger.weapon_stats.cooldown == 0.25, "conservar estadísticas de daga")
@@ -85,10 +85,10 @@ func _run() -> void:
 
 	var instance := WeaponInstance.new(sword)
 	instance.upgrade_level = 2
-	_check(instance.current_durability == -1.0 and instance.instance_id.begins_with("weapon_"), "preparar durabilidad sin desgaste funcional")
+	_check(instance.current_durability == 80.0 and instance.instance_id.begins_with("weapon_"), "inicializar durabilidad individual al máximo")
 	var serialized_instance := {"instance_id": instance.instance_id, "upgrade_level": instance.upgrade_level}
 	_check(serialized_instance.size() == 2 and serialized_instance.upgrade_level == 2, "mantener contrato de guardado de instancia")
-	_check(sword.weapon_stats.get_health_cost() == sword.weapon_stats.health_cost, "mantener costo HP legacy sin configuración")
+	_check(is_equal_approx(sword.weapon_stats.get_health_cost(), 5.0) and sword.weapon_stats.uses_durability(), "mantener costo HP y habilitar durabilidad configurable")
 
 	print("Weapon config tests: ", checks, " comprobaciones correctas")
 	quit()

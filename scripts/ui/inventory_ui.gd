@@ -8,6 +8,7 @@ class_name InventoryUI
 @onready var weapon_icon: TextureRect = $InventoryWindow/Margin/VBox/Body/RightPanel/Scroll/RightMargin/RightVBox/EquipmentPanel/EquipmentMargin/EquipmentVBox/WeaponRow/WeaponIcon
 @onready var weapon_marker: Label = $InventoryWindow/Margin/VBox/Body/RightPanel/Scroll/RightMargin/RightVBox/EquipmentPanel/EquipmentMargin/EquipmentVBox/WeaponRow/WeaponMarker
 @onready var weapon_name: Label = $InventoryWindow/Margin/VBox/Body/RightPanel/Scroll/RightMargin/RightVBox/EquipmentPanel/EquipmentMargin/EquipmentVBox/WeaponRow/WeaponName
+@onready var weapon_durability: ProgressBar = $InventoryWindow/Margin/VBox/Body/RightPanel/Scroll/RightMargin/RightVBox/EquipmentPanel/EquipmentMargin/EquipmentVBox/WeaponRow/WeaponDurability
 @onready var equip_button: Button = $InventoryWindow/Margin/VBox/ActionBar/EquipButton
 @onready var unequip_button: Button = $InventoryWindow/Margin/VBox/ActionBar/UnequipButton
 @onready var upgrade_equipped_button: Button = $InventoryWindow/Margin/VBox/ActionBar/UpgradeWeaponButton
@@ -22,6 +23,8 @@ class_name InventoryUI
 @onready var use_message: Label = $InventoryWindow/Margin/VBox/Body/RightPanel/Scroll/RightMargin/RightVBox/Description/DescriptionMargin/DescriptionVBox/UseMessage
 @onready var upgrade_info: Label = $InventoryWindow/Margin/VBox/Body/RightPanel/Scroll/RightMargin/RightVBox/Description/DescriptionMargin/DescriptionVBox/UpgradeInfo
 @onready var upgrade_button: Button = $InventoryWindow/Margin/VBox/ActionBar/UpgradeButton
+@onready var repair_button: Button = $InventoryWindow/Margin/VBox/ActionBar/RepairButton
+@onready var repair_equipped_button: Button = $InventoryWindow/Margin/VBox/ActionBar/RepairEquippedButton
 
 const SLOT_SCENE: PackedScene = preload("res://scenes/ui/inventory_slot_ui.tscn")
 const SLOT_COUNT: int = 20
@@ -30,6 +33,7 @@ var inventory: InventoryComponent
 var equipment: EquipmentComponent
 var consumables: ConsumableComponent
 var weapon_upgrades: WeaponUpgradeManager
+var weapon_repairs: WeaponRepairManager
 var slot_buttons: Array[InventorySlotUI] = []
 var visible_slots: Array[InventorySlot] = []
 var selected_index: int = -1
@@ -46,6 +50,8 @@ func _ready() -> void:
 	equip_armor_button.pressed.connect(_on_equip_armor_pressed)
 	unequip_armor_button.pressed.connect(_on_unequip_armor_pressed)
 	upgrade_button.pressed.connect(_on_upgrade_pressed)
+	repair_button.pressed.connect(_on_repair_pressed)
+	repair_equipped_button.pressed.connect(_on_repair_equipped_pressed)
 	use_button.pressed.connect(_on_use_pressed)
 	visible = false
 
@@ -78,6 +84,7 @@ func set_equipment(target_equipment: EquipmentComponent) -> void:
 	equipment = target_equipment
 	if equipment != null:
 		equipment.equipment_changed.connect(_on_equipment_changed)
+		equipment.weapon_durability_changed.connect(_on_weapon_durability_changed)
 
 	_update_equipment_visual()
 
@@ -98,6 +105,14 @@ func set_weapon_upgrades(target_upgrades: WeaponUpgradeManager) -> void:
 	weapon_upgrades = target_upgrades
 	if weapon_upgrades != null:
 		weapon_upgrades.weapon_upgraded.connect(_on_weapon_upgraded)
+	_update_equipment_buttons()
+
+func set_weapon_repairs(target_repairs: WeaponRepairManager) -> void:
+	if weapon_repairs != null and weapon_repairs.weapon_repaired.is_connected(_on_weapon_repaired):
+		weapon_repairs.weapon_repaired.disconnect(_on_weapon_repaired)
+	weapon_repairs = target_repairs
+	if weapon_repairs != null:
+		weapon_repairs.weapon_repaired.connect(_on_weapon_repaired)
 	_update_equipment_buttons()
 
 
@@ -187,7 +202,8 @@ func _show_description(slot: InventorySlot) -> void:
 		_weapon_stats_text(slot.item),
 	]
 	if slot.weapon_instance != null:
-		selected_description.text += "\nNivel de arma: +%d\n%s" % [slot.weapon_instance.upgrade_level, _weapon_upgrade_text(slot.weapon_instance)]
+		selected_description.text += "\nNivel de arma: +%d\n%s\n%s" % [slot.weapon_instance.upgrade_level, _weapon_upgrade_text(slot.weapon_instance), _weapon_durability_text(slot.weapon_instance)]
+		upgrade_info.text = _weapon_repair_text(slot.weapon_instance)
 	if slot.item.consumable_data != null:
 		selected_description.text += "\nEfecto configurable de consumible"
 	if slot.item.armor_stats != null:
@@ -270,7 +286,28 @@ func _on_upgrade_equipped_pressed() -> void:
 		use_message.text = "No se puede mejorar: %s" % result.get("reason", "error")
 	_update_equipment_visual()
 
+func _on_repair_pressed() -> void:
+	var instance := _selected_weapon_instance()
+	if weapon_repairs == null or instance == null:
+		return
+	var result := weapon_repairs.repair_weapon(instance.instance_id)
+	use_message.text = "Arma reparada: +%.0f durabilidad (%d fragmentos)." % [float(result.get("restored", 0.0)), int(result.get("cost", 0))] if result.get("success", false) else "No se puede reparar: %s" % _reason_text(result.get("reason", "error"))
+	_refresh_inventory()
+
+func _on_repair_equipped_pressed() -> void:
+	if weapon_repairs == null or equipment == null or equipment.get_equipped_weapon_instance() == null:
+		return
+	var instance := equipment.get_equipped_weapon_instance()
+	var result := weapon_repairs.repair_weapon(instance.instance_id)
+	use_message.text = "Arma reparada: +%.0f durabilidad (%d fragmentos)." % [float(result.get("restored", 0.0)), int(result.get("cost", 0))] if result.get("success", false) else "No se puede reparar: %s" % _reason_text(result.get("reason", "error"))
+	_update_equipment_visual()
+	_refresh_inventory()
+
 func _on_weapon_upgraded(_instance: WeaponInstance, _level: int) -> void:
+	_refresh_inventory()
+	_update_equipment_visual()
+
+func _on_weapon_repaired(_instance: WeaponInstance, _restored: float, _cost: int) -> void:
 	_refresh_inventory()
 	_update_equipment_visual()
 
@@ -305,6 +342,7 @@ func _update_equipment_visual() -> void:
 		weapon_icon.visible = false
 		weapon_marker.visible = false
 		weapon_name.text = "Arma: ninguna"
+		weapon_durability.visible = false
 		_update_equipment_buttons()
 		return
 
@@ -314,6 +352,7 @@ func _update_equipment_visual() -> void:
 		weapon_icon.visible = false
 		weapon_marker.visible = false
 		weapon_name.text = "Arma: ninguna"
+		weapon_durability.visible = false
 	else:
 		weapon_icon.texture = equipped.icon
 		weapon_icon.visible = equipped.icon != null
@@ -323,6 +362,7 @@ func _update_equipment_visual() -> void:
 			equipped.display_name,
 			_weapon_stats_text(equipped) + ("\nNivel +%d" % equipment.get_equipped_weapon_instance().upgrade_level if equipment.get_equipped_weapon_instance() != null else ""),
 		]
+		_update_weapon_durability(equipment.get_equipped_weapon_instance())
 	var armor := equipment.get_equipped_item(EquipmentComponent.EquipmentSlot.ARMOR)
 	if armor == null:
 		armor_icon.texture = null
@@ -363,6 +403,8 @@ func _update_equipment_buttons() -> void:
 	var selected_is_armor := selected_index >= 0 and selected_index < visible_slots.size() and visible_slots[selected_index] != null and visible_slots[selected_index].item != null and visible_slots[selected_index].item.item_type == ItemData.ItemType.ARMOR
 	equip_armor_button.disabled = equipment == null or not selected_is_armor
 	unequip_armor_button.disabled = equipment == null or equipment.get_equipped_item(EquipmentComponent.EquipmentSlot.ARMOR) == null
+	repair_button.disabled = weapon_repairs == null or selected_instance == null or not weapon_repairs.can_repair(selected_instance)
+	repair_equipped_button.disabled = weapon_repairs == null or equipment == null or equipment.get_equipped_weapon_instance() == null or not weapon_repairs.can_repair(equipment.get_equipped_weapon_instance())
 
 	# La barra inferior solo muestra acciones aplicables al contexto actual.
 	equip_button.visible = selected_is_weapon
@@ -371,7 +413,25 @@ func _update_equipment_buttons() -> void:
 	equip_armor_button.visible = selected_is_armor
 	unequip_button.visible = equipment != null and equipment.get_equipped_item(EquipmentComponent.EquipmentSlot.WEAPON) != null
 	upgrade_equipped_button.visible = equipment != null and equipment.get_equipped_weapon_instance() != null
+	repair_button.visible = selected_instance != null
+	repair_equipped_button.visible = equipment != null and equipment.get_equipped_weapon_instance() != null
 	unequip_armor_button.visible = equipment != null and equipment.get_equipped_item(EquipmentComponent.EquipmentSlot.ARMOR) != null
+
+func _update_weapon_durability(instance: WeaponInstance) -> void:
+	if instance == null or not instance.has_durability():
+		weapon_durability.visible = false
+		return
+	var maximum := instance.item.weapon_stats.get_max_durability()
+	weapon_durability.visible = maximum > 0.0
+	weapon_durability.max_value = maximum
+	weapon_durability.value = clampf(instance.current_durability, 0.0, maximum)
+	weapon_durability.tooltip_text = "Durabilidad: %.0f / %.0f (%s)" % [instance.current_durability, maximum, _durability_state(instance)]
+
+func _on_weapon_durability_changed(instance: WeaponInstance, _current: float, _maximum: float) -> void:
+	if equipment != null and equipment.get_equipped_weapon_instance() == instance:
+		_update_weapon_durability(instance)
+		_update_equipment_visual()
+	_refresh_inventory()
 
 func _reason_text(reason: String) -> String:
 	var labels := {"health_full": "vida al máximo", "player_dead": "jugador muerto", "game_over": "partida terminada", "not_in_inventory": "no está en el inventario"}
@@ -396,10 +456,25 @@ func _weapon_stats_text(item: ItemData) -> String:
 	var stats := item.weapon_stats
 	return "Daño: %.1f | Vida: %.1f | Alcance: %.1f | Recarga: %.2f" % [
 		stats.damage,
-		stats.health_cost,
+		stats.get_health_cost(),
 		stats.attack_range,
 		stats.cooldown,
 	]
+
+func _weapon_durability_text(instance: WeaponInstance) -> String:
+	if instance == null or not instance.has_durability():
+		return "Durabilidad: no aplica"
+	var maximum := instance.item.weapon_stats.get_max_durability()
+	var percentage := instance.current_durability / maximum * 100.0 if maximum > 0.0 else 0.0
+	return "Durabilidad: %.0f / %.0f (%.0f%%) — %s" % [instance.current_durability, maximum, percentage, _durability_state(instance)]
+
+func _durability_state(instance: WeaponInstance) -> String:
+	if instance == null or not instance.has_durability():
+		return "No aplica"
+	if instance.is_broken():
+		return "Rota"
+	var maximum := instance.item.weapon_stats.get_max_durability()
+	return "Deteriorada" if maximum > 0.0 and instance.current_durability / maximum < 0.5 else "Normal"
 
 func _weapon_upgrade_text(instance: WeaponInstance) -> String:
 	if instance == null or instance.item == null or instance.item.weapon_stats == null:
@@ -412,6 +487,14 @@ func _weapon_upgrade_text(instance: WeaponInstance) -> String:
 		if instance.upgrade_level < weapon_upgrades.max_level:
 			next = instance.item.weapon_stats.damage * (1.0 + 0.1 * (instance.upgrade_level + 1))
 	return "Daño actual: %.1f | Siguiente: %.1f | Costo: %d fragmentos" % [current, next, cost]
+
+func _weapon_repair_text(instance: WeaponInstance) -> String:
+	if weapon_repairs == null or instance == null:
+		return ""
+	var quote := weapon_repairs.get_quote(instance)
+	if not quote.get("success", false):
+		return "Reparación: %s" % _reason_text(quote.get("reason", "no disponible"))
+	return "Reparación: +%.0f durabilidad | Costo: %d/%d fragmentos" % [float(quote.restored), int(quote.cost), inventory.get_item_quantity(weapon_repairs.material_id)]
 
 func _armor_stats_text(item: ItemData) -> String:
 	if item == null or item.armor_stats == null:

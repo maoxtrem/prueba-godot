@@ -4,6 +4,7 @@ class_name DebugSettings
 @export var debug_enabled: bool = false
 @export var player_invulnerable: bool = false
 @export var infinite_health: bool = false
+@export var grant_test_ranged_weapons: bool = false
 @export_range(0.0, 10.0, 0.01) var enemy_damage_multiplier: float = 0.1
 
 

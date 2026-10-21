@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://systems/inventory/item_data.gd" id="1_item_data"]
+
+[resource]
+script = ExtResource("1_item_data")
+id = "special_ammo"
+display_name = "Munición especial"
+description = "Munición de alta potencia para futuras armas a distancia."
+item_type = 5
+max_stack = 50

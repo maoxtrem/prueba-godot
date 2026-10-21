@@ -17,6 +17,8 @@ extends Node2D
 @onready var upgrades: UpgradeManager = $Player/UpgradeManager
 @onready var consumables: ConsumableComponent = $Player/ConsumableComponent
 @onready var weapon_upgrades: WeaponUpgradeManager = $Player/WeaponUpgradeManager
+@onready var weapon_repairs: WeaponRepairManager = $Player/WeaponRepairManager
+@onready var ammo_manager: AmmoManager = $Player/AmmoManager
 @onready var game_manager: GameManager = $GameManager
 @onready var quest_manager: QuestManager = $QuestManager
 @onready var save_manager: SaveManager = $SaveManager
@@ -33,14 +35,19 @@ func _ready() -> void:
 	game_manager.setup(player.health, wave_manager)
 	upgrades.setup(player.health, player.componente_ataque, player.costo_movimiento, player, game_manager)
 	weapon_upgrades.setup(inventory, equipment, game_manager)
+	weapon_repairs.setup(inventory, equipment, game_manager)
+	ammo_manager.setup(inventory, player.health, game_manager)
 	quest_manager.setup(inventory, player.health, game_manager)
 	save_manager.setup(self)
 	game_manager.game_over_reached.connect(_on_game_over_reached)
 	hud.restart_requested.connect(_on_restart_requested)
+	player.componente_ataque.weapon_broken.connect(hud.show_weapon_broken)
 	hud.set_inventory(inventory)
 	hud.set_equipment(equipment)
 	hud.set_consumables(consumables)
 	hud.set_weapon_upgrades(weapon_upgrades)
+	hud.set_weapon_repairs(weapon_repairs)
+	hud.set_ammo_manager(ammo_manager)
 	hud.set_quest_manager(quest_manager)
 
 	# Conectar eventos de las oleadas
@@ -216,6 +223,8 @@ func restore_from_save(data: Dictionary) -> Dictionary:
 			var weapon_data: Dictionary = entry.weapon_instance
 			var instance := WeaponInstance.new(item, String(weapon_data.instance_id))
 			instance.upgrade_level = int(weapon_data.upgrade_level)
+			if weapon_data.has("current_durability") and not instance.restore_durability(float(weapon_data.current_durability)):
+				return {"success": false, "error": "invalid_weapon_durability"}
 			if seen_instances.has(instance.instance_id): return {"success": false, "error": "duplicate_weapon_instance"}
 			seen_instances[instance.instance_id] = true
 			restored_slots.append(InventorySlot.new(item, 1, instance))
@@ -229,6 +238,8 @@ func restore_from_save(data: Dictionary) -> Dictionary:
 		if weapon_item == null: return {"success": false, "error": "unknown_equipped_weapon"}
 		weapon_instance = WeaponInstance.new(weapon_item, String(equipment_data.weapon.instance_id))
 		weapon_instance.upgrade_level = int(equipment_data.weapon.upgrade_level)
+		if equipment_data.weapon.has("current_durability") and not weapon_instance.restore_durability(float(equipment_data.weapon.current_durability)):
+			return {"success": false, "error": "invalid_equipped_weapon_durability"}
 		if seen_instances.has(weapon_instance.instance_id): return {"success": false, "error": "duplicate_weapon_instance"}
 		seen_instances[weapon_instance.instance_id] = true
 	var armor: ItemData = null

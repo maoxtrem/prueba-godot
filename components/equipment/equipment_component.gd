@@ -8,6 +8,7 @@ enum EquipmentSlot {
 
 signal equipment_changed(slot: EquipmentSlot, item: ItemData)
 signal weapon_instance_changed(instance: WeaponInstance)
+signal weapon_durability_changed(instance: WeaponInstance, current: float, maximum: float)
 
 @export_node_path("Node") var inventory_path: NodePath = NodePath("../InventoryComponent")
 @export_node_path("Node") var health_path: NodePath = NodePath("../HealthComponent")
@@ -64,7 +65,9 @@ func equip_item(item_id: String, instance_id: String = "") -> Dictionary:
 
 	_set_equipped(target_slot, item)
 	if target_slot == EquipmentSlot.WEAPON:
+		_disconnect_weapon_instance(previous_weapon_instance)
 		equipped_weapon_instance = selected_slot.weapon_instance
+		_connect_weapon_instance(equipped_weapon_instance)
 	equipment_changed.emit(target_slot, item)
 	if target_slot == EquipmentSlot.WEAPON:
 		weapon_instance_changed.emit(equipped_weapon_instance)
@@ -100,6 +103,7 @@ func unequip_item(slot: EquipmentSlot) -> Dictionary:
 		return _failure("inventory_full")
 	_set_equipped(slot, null)
 	if slot == EquipmentSlot.WEAPON:
+		_disconnect_weapon_instance(equipped_weapon_instance)
 		equipped_weapon_instance = null
 	equipment_changed.emit(slot, null)
 	if slot == EquipmentSlot.WEAPON:
@@ -114,7 +118,9 @@ func get_equipped_weapon_instance() -> WeaponInstance:
 	return equipped_weapon_instance
 
 func restore_equipment(weapon_instance: WeaponInstance, armor: ItemData) -> void:
+	_disconnect_weapon_instance(equipped_weapon_instance)
 	equipped_weapon_instance = weapon_instance
+	_connect_weapon_instance(equipped_weapon_instance)
 	equipped_weapon = weapon_instance.item if weapon_instance != null else null
 	equipped_armor = armor
 	equipment_changed.emit(EquipmentSlot.WEAPON, equipped_weapon)
@@ -168,3 +174,14 @@ func _failure(reason: String) -> Dictionary:
 		"success": false,
 		"reason": reason,
 	}
+
+func _connect_weapon_instance(instance: WeaponInstance) -> void:
+	if instance != null and not instance.durability_changed.is_connected(_on_weapon_durability_changed):
+		instance.durability_changed.connect(_on_weapon_durability_changed)
+
+func _disconnect_weapon_instance(instance: WeaponInstance) -> void:
+	if instance != null and instance.durability_changed.is_connected(_on_weapon_durability_changed):
+		instance.durability_changed.disconnect(_on_weapon_durability_changed)
+
+func _on_weapon_durability_changed(instance: WeaponInstance, current: float, maximum: float) -> void:
+	weapon_durability_changed.emit(instance, current, maximum)

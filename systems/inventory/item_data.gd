@@ -7,6 +7,7 @@ enum ItemType {
 	CONSUMABLE,
 	MATERIAL,
 	SPECIAL,
+	AMMO,
 }
 
 enum Rarity {

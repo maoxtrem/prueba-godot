@@ -8,18 +8,31 @@ class_name WeaponCostConfig
 @export var uses_durability: bool = false
 @export var uses_ammo: bool = false
 
-func is_valid() -> bool:
-	if health_cost < 0.0 or durability_cost < 0.0 or ammo_per_attack < 0:
-		return false
-	if uses_durability:
-		if durability_cost <= 0.0:
-			return false
-	elif durability_cost != 0.0:
-		return false
+func validate() -> Dictionary:
+	if health_cost < 0.0:
+		return {"success": false, "error": "negative_health_cost"}
+	if durability_cost < 0.0:
+		return {"success": false, "error": "negative_durability_cost"}
+	if ammo_per_attack < 0:
+		return {"success": false, "error": "negative_ammo_cost"}
+	if uses_durability and durability_cost <= 0.0:
+		return {"success": false, "error": "durability_cost_required"}
+	if not uses_durability and durability_cost != 0.0:
+		return {"success": false, "error": "durability_flag_required"}
 	if uses_ammo:
 		var ammo_id := ammo_item_id.strip_edges()
-		return not ammo_id.is_empty() and ammo_id == ammo_item_id and ammo_id.is_valid_filename() and not ammo_id.contains("/") and not ammo_id.contains("\\") and ammo_per_attack > 0
-	return ammo_item_id.strip_edges().is_empty() and ammo_per_attack == 0
+		if ammo_id.is_empty() or ammo_id != ammo_item_id:
+			return {"success": false, "error": "ammo_id_required"}
+		if not ammo_id.is_valid_filename() or ammo_id.contains("/") or ammo_id.contains("\\"):
+			return {"success": false, "error": "invalid_ammo_id"}
+		if ammo_per_attack <= 0:
+			return {"success": false, "error": "ammo_cost_required"}
+	elif not ammo_item_id.strip_edges().is_empty() or ammo_per_attack != 0:
+		return {"success": false, "error": "ammo_flag_required"}
+	return {"success": true, "error": ""}
+
+func is_valid() -> bool:
+	return bool(validate()["success"])
 
 func uses_health() -> bool:
 	return health_cost > 0.0

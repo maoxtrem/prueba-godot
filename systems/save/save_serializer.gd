@@ -101,7 +101,7 @@ func _serialize_inventory(inventory: InventoryComponent) -> Dictionary:
 	for slot in inventory.get_slots():
 		var entry := {"item_id": slot.item.id, "quantity": slot.quantity}
 		if slot.weapon_instance != null:
-			entry["weapon_instance"] = {"instance_id": slot.weapon_instance.instance_id, "upgrade_level": slot.weapon_instance.upgrade_level}
+			entry["weapon_instance"] = _serialize_weapon_instance(slot.weapon_instance)
 		result.append(entry)
 	return {"capacity": inventory.capacity, "slots": result}
 
@@ -113,7 +113,10 @@ func _serialize_equipment(equipment: EquipmentComponent) -> Dictionary:
 
 func _serialize_weapon_instance(instance: WeaponInstance) -> Dictionary:
 	if instance == null: return {}
-	return {"item_id": instance.item.id, "instance_id": instance.instance_id, "upgrade_level": instance.upgrade_level}
+	var result := {"item_id": instance.item.id, "instance_id": instance.instance_id, "upgrade_level": instance.upgrade_level}
+	if instance.has_durability():
+		result["current_durability"] = instance.current_durability
+	return result
 
 func _serialize_upgrades(upgrades: UpgradeManager) -> Dictionary:
 	var result: Dictionary = {}
@@ -160,6 +163,7 @@ func _validate_inventory(value: Variant) -> bool:
 			if not _is_integer(level_value): return false
 			var level := int(level_value)
 			if instance_id.is_empty() or instances.has(instance_id) or level < 0 or level > MAX_WEAPON_LEVEL or quantity != 1: return false
+			if not _validate_weapon_durability(item, weapon): return false
 			instances[instance_id] = true
 		elif entry.has("weapon_instance"):
 			return false
@@ -176,6 +180,7 @@ func _validate_equipment(value: Variant, inventory: Dictionary) -> bool:
 		var level := int(level_value)
 		var instance_id := String(weapon.get("instance_id", ""))
 		if item == null or item.item_type != ItemData.ItemType.WEAPON or level < 0 or level > MAX_WEAPON_LEVEL or instance_id.is_empty(): return false
+		if not _validate_weapon_durability(item, weapon): return false
 		for entry in inventory.get("slots", []):
 			var stored = entry.get("weapon_instance", {})
 			if stored is Dictionary and String(stored.get("instance_id", "")) == instance_id: return false
@@ -184,6 +189,19 @@ func _validate_equipment(value: Variant, inventory: Dictionary) -> bool:
 		var armor := resolve_item(armor_id)
 		if armor == null or armor.item_type != ItemData.ItemType.ARMOR: return false
 	return true
+
+func _validate_weapon_durability(item: ItemData, weapon: Dictionary) -> bool:
+	if item == null or item.weapon_stats == null:
+		return false
+	var uses_durability := item.weapon_stats.uses_durability()
+	if not weapon.has("current_durability"):
+		return true # Guardado anterior: se inicializa al máximo al restaurar.
+	var value = weapon.get("current_durability")
+	if not _is_number(value):
+		return false
+	if not uses_durability:
+		return false
+	return float(value) >= 0.0 and float(value) <= item.weapon_stats.get_max_durability()
 
 func _validate_upgrades(value: Variant) -> bool:
 	if not value is Dictionary: return false

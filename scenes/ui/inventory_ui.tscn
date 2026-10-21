@@ -176,6 +176,12 @@ autowrap_mode = 2
 vertical_alignment = 1
 text = "Arma: ninguna"
 
+[node name="WeaponDurability" type="ProgressBar" parent="InventoryWindow/Margin/VBox/Body/RightPanel/Scroll/RightMargin/RightVBox/EquipmentPanel/EquipmentMargin/EquipmentVBox/WeaponRow"]
+custom_minimum_size = Vector2(130, 18)
+layout_mode = 2
+size_flags_vertical = 4
+show_percentage = false
+
 [node name="ArmorPanel" type="PanelContainer" parent="InventoryWindow/Margin/VBox/Body/RightPanel/Scroll/RightMargin/RightVBox"]
 custom_minimum_size = Vector2(0, 86)
 layout_mode = 2
@@ -289,6 +295,18 @@ custom_minimum_size = Vector2(120, 40)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Mejorar equipada"
+
+[node name="RepairButton" type="Button" parent="InventoryWindow/Margin/VBox/ActionBar"]
+custom_minimum_size = Vector2(120, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Reparar arma"
+
+[node name="RepairEquippedButton" type="Button" parent="InventoryWindow/Margin/VBox/ActionBar"]
+custom_minimum_size = Vector2(120, 40)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Reparar equipada"
 
 [node name="UseButton" type="Button" parent="InventoryWindow/Margin/VBox/ActionBar"]
 custom_minimum_size = Vector2(120, 40)

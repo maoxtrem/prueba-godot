@@ -240,6 +240,73 @@ custom_minimum_size = Vector2(0, 34)
 layout_mode = 2
 text = "Comprar"
 
+[node name="AmmoTitle" type="Label" parent="Panel/Margin/VBox/Upgrades/CardList"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Munición"
+
+[node name="AmmoList" type="VBoxContainer" parent="Panel/Margin/VBox/Upgrades/CardList"]
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Ammo0" type="HBoxContainer" parent="Panel/Margin/VBox/Upgrades/CardList/AmmoList"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+
+[node name="Name" type="Label" parent="Panel/Margin/VBox/Upgrades/CardList/AmmoList/Ammo0"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Virotes"
+
+[node name="Info" type="Label" parent="Panel/Margin/VBox/Upgrades/CardList/AmmoList/Ammo0"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "10 unidades | 5 HP | Disponibles: 0"
+
+[node name="BuyButton" type="Button" parent="Panel/Margin/VBox/Upgrades/CardList/AmmoList/Ammo0"]
+custom_minimum_size = Vector2(120, 34)
+layout_mode = 2
+text = "Comprar"
+
+[node name="Ammo1" type="HBoxContainer" parent="Panel/Margin/VBox/Upgrades/CardList/AmmoList"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+
+[node name="Name" type="Label" parent="Panel/Margin/VBox/Upgrades/CardList/AmmoList/Ammo1"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Balas"
+
+[node name="Info" type="Label" parent="Panel/Margin/VBox/Upgrades/CardList/AmmoList/Ammo1"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "20 unidades | 12 HP | Disponibles: 0"
+
+[node name="BuyButton" type="Button" parent="Panel/Margin/VBox/Upgrades/CardList/AmmoList/Ammo1"]
+custom_minimum_size = Vector2(120, 34)
+layout_mode = 2
+text = "Comprar"
+
+[node name="Ammo2" type="HBoxContainer" parent="Panel/Margin/VBox/Upgrades/CardList/AmmoList"]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+
+[node name="Name" type="Label" parent="Panel/Margin/VBox/Upgrades/CardList/AmmoList/Ammo2"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Munición especial"
+
+[node name="Info" type="Label" parent="Panel/Margin/VBox/Upgrades/CardList/AmmoList/Ammo2"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "5 unidades | 15 HP | Disponibles: 0"
+
+[node name="BuyButton" type="Button" parent="Panel/Margin/VBox/Upgrades/CardList/AmmoList/Ammo2"]
+custom_minimum_size = Vector2(120, 34)
+layout_mode = 2
+text = "Comprar"
+
 [node name="Footer" type="HBoxContainer" parent="Panel/Margin/VBox"]
 layout_mode = 2
 

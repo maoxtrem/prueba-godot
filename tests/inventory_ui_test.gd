@@ -26,7 +26,7 @@ func _run() -> void:
 	_check(grid.get_child_count() == 20, "mostrar exactamente 20 espacios")
 	_check(inventory_window.custom_minimum_size == Vector2(1040, 600), "definir tamaño mínimo del panel principal")
 	_check(grid.get_child(0).custom_minimum_size == Vector2(72, 72), "mantener tamaño uniforme de las casillas")
-	_check(action_bar.get_child_count() == 7, "separar las acciones en una barra inferior")
+	_check(action_bar.get_child_count() == 9, "separar las acciones en una barra inferior")
 	_check(not inventory_ui.visible, "iniciar con inventario cerrado")
 	var debug_settings: DebugSettings = main_instance.debug_settings.duplicate()
 	debug_settings.debug_enabled = true
