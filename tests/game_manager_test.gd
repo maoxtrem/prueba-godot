@@ -14,6 +14,8 @@ func _run() -> void:
 	root.add_child(main_instance)
 	set_current_scene(main_instance)
 	await process_frame
+	# Esta suite verifica GAME_OVER con daño normal, sin la configuración Debug del recurso de juego.
+	main_instance.player.configure_debug(null)
 
 	var manager: GameManager = main_instance.get_node("GameManager")
 	var waves: WaveManager = main_instance.get_node("WaveManager")

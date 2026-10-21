@@ -6,6 +6,8 @@ static var _next_id: int = 1
 var item: ItemData
 var instance_id: String
 var upgrade_level: int = 0
+# Preparado para futuras fases; no se consume ni se serializa todavía.
+var current_durability: float = -1.0
 
 func _init(item_data: ItemData, id: String = "") -> void:
 	item = item_data

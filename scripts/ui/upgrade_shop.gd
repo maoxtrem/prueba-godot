@@ -3,9 +3,9 @@ class_name UpgradeShop
 
 signal close_requested
 
-@onready var health_label: Label = $Panel/Margin/VBox/HealthLabel
+@onready var health_label: Label = $Panel/Margin/VBox/Header/HealthLabel
 @onready var message_label: Label = $Panel/Margin/VBox/Message
-@onready var close_button: Button = $Panel/Margin/VBox/CloseButton
+@onready var close_button: Button = $Panel/Margin/VBox/Footer/CloseButton
 
 var upgrade_manager: UpgradeManager
 var health: HealthComponent
@@ -15,14 +15,14 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	close_button.pressed.connect(_on_close_pressed)
 	for index in range(4):
-		var card := $Panel/Margin/VBox/Upgrades.get_child(index)
+		var card := $Panel/Margin/VBox/Upgrades/CardList.get_child(index)
 		cards.append({
 			"panel": card,
-			"name": card.get_node("Name"),
-			"description": card.get_node("Description"),
-			"level": card.get_node("Level"),
-			"cost": card.get_node("Cost"),
-			"button": card.get_node("BuyButton"),
+			"name": card.get_node("Margin/Content/Name"),
+			"description": card.get_node("Margin/Content/Description"),
+			"level": card.get_node("Margin/Content/Level"),
+			"cost": card.get_node("Margin/Content/Cost"),
+			"button": card.get_node("Margin/Content/BuyButton"),
 		})
 		cards[index].button.pressed.connect(_on_buy_pressed.bind(index))
 	visible = false

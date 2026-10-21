@@ -8,3 +8,4 @@ damage = 18.0
 health_cost = 5.0
 attack_range = 100.0
 cooldown = 0.6
+combat_type = 0

@@ -5,6 +5,7 @@ enum GameState {
 	READY,
 	PLAYING,
 	PAUSED,
+	BETWEEN_WAVES,
 	UPGRADE_SELECTION,
 	GAME_OVER,
 }
@@ -48,6 +49,35 @@ func resume_game() -> bool:
 		return false
 
 	_change_state(GameState.PLAYING)
+	get_tree().paused = false
+	return true
+
+
+func enter_between_waves() -> bool:
+	if current_state != GameState.PLAYING:
+		return false
+	_change_state(GameState.BETWEEN_WAVES)
+	get_tree().paused = true
+	return true
+
+
+func continue_after_between_waves() -> bool:
+	if current_state != GameState.BETWEEN_WAVES:
+		return false
+	_change_state(GameState.PLAYING)
+	get_tree().paused = false
+	if wave_manager != null:
+		wave_manager.start_pending_wave()
+	return true
+
+
+func restore_state_for_load(saved_state: int) -> bool:
+	# Los guardados antiguos de la Fase 12B usaban PAUSED para este punto.
+	if saved_state == GameState.BETWEEN_WAVES or saved_state == GameState.PAUSED:
+		current_state = GameState.BETWEEN_WAVES
+		get_tree().paused = true
+		return true
+	current_state = GameState.READY
 	get_tree().paused = false
 	return true
 

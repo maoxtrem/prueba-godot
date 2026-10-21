@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/upgrade_shop.gd" id="1_shop"]
+[ext_resource type="Theme" path="res://resources/themes/game_ui_theme.tres" id="2_theme"]
 
 [node name="UpgradeShop" type="Control"]
 layout_mode = 3
@@ -10,20 +11,32 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 1
-process_mode = 2
+process_mode = 3
 script = ExtResource("1_shop")
+theme = ExtResource("2_theme")
+
+[node name="Overlay" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+color = Color(0.027, 0.035, 0.05, 0.72)
 
 [node name="Panel" type="PanelContainer" parent="."]
+custom_minimum_size = Vector2(780, 570)
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -360.0
-offset_top = -300.0
-offset_right = 360.0
-offset_bottom = 300.0
+offset_left = -390.0
+offset_top = -285.0
+offset_right = 390.0
+offset_bottom = 285.0
 
 [node name="Margin" type="MarginContainer" parent="Panel"]
 layout_mode = 2
@@ -34,125 +47,204 @@ theme_override_constants/margin_bottom = 20
 
 [node name="VBox" type="VBoxContainer" parent="Panel/Margin"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 12
 
-[node name="Title" type="Label" parent="Panel/Margin/VBox"]
-layout_mode = 2
-text = "Elige tu sacrificio"
-horizontal_alignment = 1
-
-[node name="HealthLabel" type="Label" parent="Panel/Margin/VBox"]
-layout_mode = 2
-text = "Vida disponible: 100.0 / 100.0 HP"
-horizontal_alignment = 1
-
-[node name="Message" type="Label" parent="Panel/Margin/VBox"]
-layout_mode = 2
-text = "Puedes comprar varias mejoras."
-horizontal_alignment = 1
-
-[node name="Upgrades" type="VBoxContainer" parent="Panel/Margin/VBox"]
-layout_mode = 2
-size_flags_vertical = 3
-theme_override_constants/separation = 6
-
-[node name="Upgrade0" type="VBoxContainer" parent="Panel/Margin/VBox/Upgrades"]
-layout_mode = 2
-
-[node name="Name" type="Label" parent="Panel/Margin/VBox/Upgrades/Upgrade0"]
-layout_mode = 2
-text = "Mejora"
-
-[node name="Description" type="Label" parent="Panel/Margin/VBox/Upgrades/Upgrade0"]
-layout_mode = 2
-text = "Descripción"
-
-[node name="Level" type="Label" parent="Panel/Margin/VBox/Upgrades/Upgrade0"]
-layout_mode = 2
-text = "Nivel: 0 / 3"
-
-[node name="Cost" type="Label" parent="Panel/Margin/VBox/Upgrades/Upgrade0"]
-layout_mode = 2
-text = "Costo: 15 HP"
-
-[node name="BuyButton" type="Button" parent="Panel/Margin/VBox/Upgrades/Upgrade0"]
-custom_minimum_size = Vector2(0, 30)
-layout_mode = 2
-text = "Comprar"
-
-[node name="Upgrade1" type="VBoxContainer" parent="Panel/Margin/VBox/Upgrades"]
-layout_mode = 2
-
-[node name="Name" type="Label" parent="Panel/Margin/VBox/Upgrades/Upgrade1"]
-layout_mode = 2
-text = "Mejora"
-
-[node name="Description" type="Label" parent="Panel/Margin/VBox/Upgrades/Upgrade1"]
-layout_mode = 2
-text = "Descripción"
-
-[node name="Level" type="Label" parent="Panel/Margin/VBox/Upgrades/Upgrade1"]
-layout_mode = 2
-text = "Nivel: 0 / 3"
-
-[node name="Cost" type="Label" parent="Panel/Margin/VBox/Upgrades/Upgrade1"]
-layout_mode = 2
-text = "Costo: 15 HP"
-
-[node name="BuyButton" type="Button" parent="Panel/Margin/VBox/Upgrades/Upgrade1"]
-custom_minimum_size = Vector2(0, 30)
-layout_mode = 2
-text = "Comprar"
-
-[node name="Upgrade2" type="VBoxContainer" parent="Panel/Margin/VBox/Upgrades"]
-layout_mode = 2
-
-[node name="Name" type="Label" parent="Panel/Margin/VBox/Upgrades/Upgrade2"]
-layout_mode = 2
-text = "Mejora"
-
-[node name="Description" type="Label" parent="Panel/Margin/VBox/Upgrades/Upgrade2"]
-layout_mode = 2
-text = "Descripción"
-
-[node name="Level" type="Label" parent="Panel/Margin/VBox/Upgrades/Upgrade2"]
-layout_mode = 2
-text = "Nivel: 0 / 3"
-
-[node name="Cost" type="Label" parent="Panel/Margin/VBox/Upgrades/Upgrade2"]
-layout_mode = 2
-text = "Costo: 15 HP"
-
-[node name="BuyButton" type="Button" parent="Panel/Margin/VBox/Upgrades/Upgrade2"]
-custom_minimum_size = Vector2(0, 30)
-layout_mode = 2
-text = "Comprar"
-
-[node name="Upgrade3" type="VBoxContainer" parent="Panel/Margin/VBox/Upgrades"]
-layout_mode = 2
-
-[node name="Name" type="Label" parent="Panel/Margin/VBox/Upgrades/Upgrade3"]
-layout_mode = 2
-text = "Mejora"
-
-[node name="Description" type="Label" parent="Panel/Margin/VBox/Upgrades/Upgrade3"]
-layout_mode = 2
-text = "Descripción"
-
-[node name="Level" type="Label" parent="Panel/Margin/VBox/Upgrades/Upgrade3"]
-layout_mode = 2
-text = "Nivel: 0 / 3"
-
-[node name="Cost" type="Label" parent="Panel/Margin/VBox/Upgrades/Upgrade3"]
-layout_mode = 2
-text = "Costo: 15 HP"
-
-[node name="BuyButton" type="Button" parent="Panel/Margin/VBox/Upgrades/Upgrade3"]
-custom_minimum_size = Vector2(0, 30)
-layout_mode = 2
-text = "Comprar"
-
-[node name="CloseButton" type="Button" parent="Panel/Margin/VBox"]
+[node name="Header" type="HBoxContainer" parent="Panel/Margin/VBox"]
 custom_minimum_size = Vector2(0, 42)
 layout_mode = 2
+
+[node name="Title" type="Label" parent="Panel/Margin/VBox/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 23
+text = "Tienda de mejoras"
+vertical_alignment = 1
+
+[node name="HealthLabel" type="Label" parent="Panel/Margin/VBox/Header"]
+layout_mode = 2
+horizontal_alignment = 2
+vertical_alignment = 1
+text = "Vida: 100 / 100 HP"
+
+[node name="CloseButton" type="Button" parent="Panel/Margin/VBox/Header"]
+custom_minimum_size = Vector2(42, 36)
+layout_mode = 2
+text = "X"
+
+[node name="Message" type="Label" parent="Panel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+autowrap_mode = 2
+text = "Puedes comprar varias mejoras."
+
+[node name="Upgrades" type="ScrollContainer" parent="Panel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 390)
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="CardList" type="VBoxContainer" parent="Panel/Margin/VBox/Upgrades"]
+custom_minimum_size = Vector2(0, 380)
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Upgrade0" type="PanelContainer" parent="Panel/Margin/VBox/Upgrades/CardList"]
+custom_minimum_size = Vector2(0, 116)
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="Panel/Margin/VBox/Upgrades/CardList/Upgrade0"]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 10
+
+[node name="Content" type="VBoxContainer" parent="Panel/Margin/VBox/Upgrades/CardList/Upgrade0/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="Name" type="Label" parent="Panel/Margin/VBox/Upgrades/CardList/Upgrade0/Margin/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 17
+text = "Mejora"
+
+[node name="Description" type="Label" parent="Panel/Margin/VBox/Upgrades/CardList/Upgrade0/Margin/Content"]
+layout_mode = 2
+autowrap_mode = 2
+text = "Descripción"
+
+[node name="Level" type="Label" parent="Panel/Margin/VBox/Upgrades/CardList/Upgrade0/Margin/Content"]
+layout_mode = 2
+text = "Nivel: 0 / 3"
+
+[node name="Cost" type="Label" parent="Panel/Margin/VBox/Upgrades/CardList/Upgrade0/Margin/Content"]
+layout_mode = 2
+text = "Costo: 15 HP"
+
+[node name="BuyButton" type="Button" parent="Panel/Margin/VBox/Upgrades/CardList/Upgrade0/Margin/Content"]
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+text = "Comprar"
+
+[node name="Upgrade1" type="PanelContainer" parent="Panel/Margin/VBox/Upgrades/CardList"]
+custom_minimum_size = Vector2(0, 116)
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="Panel/Margin/VBox/Upgrades/CardList/Upgrade1"]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 10
+
+[node name="Content" type="VBoxContainer" parent="Panel/Margin/VBox/Upgrades/CardList/Upgrade1/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="Name" type="Label" parent="Panel/Margin/VBox/Upgrades/CardList/Upgrade1/Margin/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 17
+text = "Mejora"
+
+[node name="Description" type="Label" parent="Panel/Margin/VBox/Upgrades/CardList/Upgrade1/Margin/Content"]
+layout_mode = 2
+autowrap_mode = 2
+text = "Descripción"
+
+[node name="Level" type="Label" parent="Panel/Margin/VBox/Upgrades/CardList/Upgrade1/Margin/Content"]
+layout_mode = 2
+text = "Nivel: 0 / 3"
+
+[node name="Cost" type="Label" parent="Panel/Margin/VBox/Upgrades/CardList/Upgrade1/Margin/Content"]
+layout_mode = 2
+text = "Costo: 15 HP"
+
+[node name="BuyButton" type="Button" parent="Panel/Margin/VBox/Upgrades/CardList/Upgrade1/Margin/Content"]
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+text = "Comprar"
+
+[node name="Upgrade2" type="PanelContainer" parent="Panel/Margin/VBox/Upgrades/CardList"]
+custom_minimum_size = Vector2(0, 116)
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="Panel/Margin/VBox/Upgrades/CardList/Upgrade2"]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 10
+
+[node name="Content" type="VBoxContainer" parent="Panel/Margin/VBox/Upgrades/CardList/Upgrade2/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="Name" type="Label" parent="Panel/Margin/VBox/Upgrades/CardList/Upgrade2/Margin/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 17
+text = "Mejora"
+
+[node name="Description" type="Label" parent="Panel/Margin/VBox/Upgrades/CardList/Upgrade2/Margin/Content"]
+layout_mode = 2
+autowrap_mode = 2
+text = "Descripción"
+
+[node name="Level" type="Label" parent="Panel/Margin/VBox/Upgrades/CardList/Upgrade2/Margin/Content"]
+layout_mode = 2
+text = "Nivel: 0 / 3"
+
+[node name="Cost" type="Label" parent="Panel/Margin/VBox/Upgrades/CardList/Upgrade2/Margin/Content"]
+layout_mode = 2
+text = "Costo: 15 HP"
+
+[node name="BuyButton" type="Button" parent="Panel/Margin/VBox/Upgrades/CardList/Upgrade2/Margin/Content"]
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+text = "Comprar"
+
+[node name="Upgrade3" type="PanelContainer" parent="Panel/Margin/VBox/Upgrades/CardList"]
+custom_minimum_size = Vector2(0, 116)
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="Panel/Margin/VBox/Upgrades/CardList/Upgrade3"]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 10
+
+[node name="Content" type="VBoxContainer" parent="Panel/Margin/VBox/Upgrades/CardList/Upgrade3/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="Name" type="Label" parent="Panel/Margin/VBox/Upgrades/CardList/Upgrade3/Margin/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 17
+text = "Mejora"
+
+[node name="Description" type="Label" parent="Panel/Margin/VBox/Upgrades/CardList/Upgrade3/Margin/Content"]
+layout_mode = 2
+autowrap_mode = 2
+text = "Descripción"
+
+[node name="Level" type="Label" parent="Panel/Margin/VBox/Upgrades/CardList/Upgrade3/Margin/Content"]
+layout_mode = 2
+text = "Nivel: 0 / 3"
+
+[node name="Cost" type="Label" parent="Panel/Margin/VBox/Upgrades/CardList/Upgrade3/Margin/Content"]
+layout_mode = 2
+text = "Costo: 15 HP"
+
+[node name="BuyButton" type="Button" parent="Panel/Margin/VBox/Upgrades/CardList/Upgrade3/Margin/Content"]
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+text = "Comprar"
+
+[node name="Footer" type="HBoxContainer" parent="Panel/Margin/VBox"]
+layout_mode = 2
+
+[node name="CloseButton" type="Button" parent="Panel/Margin/VBox/Footer"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+size_flags_horizontal = 3
 text = "Cerrar"

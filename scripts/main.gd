@@ -59,8 +59,7 @@ func _ready() -> void:
 	)
 	wave_manager.enemy_killed.connect(quest_manager.register_enemy_kill)
 	wave_manager.wave_completed.connect(quest_manager.register_wave_completed)
-	if safe_wave_checkpoints:
-		wave_manager.wave_completed.connect(_on_wave_completed_checkpoint)
+	wave_manager.wave_completed.connect(_on_wave_completed_checkpoint)
 	player.get_node("PickupComponent").item_collected.connect(quest_manager.register_items_collected)
 
 	# Conectar cambios de vida del jugador
@@ -115,6 +114,9 @@ func continue_saved_game() -> Dictionary:
 	var result := save_manager.load_game("", true)
 	if not result.success:
 		return result
+	if game_manager.current_state == GameManager.GameState.BETWEEN_WAVES:
+		hud.show_between_waves(wave_manager.current_wave, wave_manager.total_kills, player.health.current_health, player.health.max_health)
+		return {"success": true}
 	if not game_manager.start_game():
 		return {"success": false, "error": "could_not_start_game"}
 	wave_manager.resume_pending_wave()
@@ -171,6 +173,8 @@ func restore_from_save(data: Dictionary) -> Dictionary:
 	if not effects_restore(game.temporary_effects): return {"success": false, "error": "effect_restore_failed"}
 	if not wave_manager.restore_statistics(int(game.wave.current), int(game.wave.kills)):
 		return {"success": false, "error": "wave_restore_failed"}
+	if not game_manager.restore_state_for_load(int(game.get("game_state", GameManager.GameState.READY))):
+		return {"success": false, "error": "game_state_restore_failed"}
 	_sync_hud()
 	return {"success": true}
 
@@ -179,7 +183,7 @@ func effects_restore(restored: Array) -> bool:
 	return player.get_node("StatusEffectComponent").restore_effects(restored, Callable(serializer, "resolve_consumable_effect"))
 
 func can_save_game() -> bool:
-	return game_manager.current_state == GameManager.GameState.PAUSED and not game_manager.is_game_over() and not wave_manager.wave_active and not _has_active_enemies()
+	return game_manager.current_state == GameManager.GameState.BETWEEN_WAVES and not game_manager.is_game_over() and not wave_manager.wave_active and not _has_active_enemies()
 
 func _has_active_enemies() -> bool:
 	for enemy in $EnemyContainer.get_children():
@@ -210,15 +214,19 @@ func close_pause_menu() -> bool:
 	hud.pause_ui.hide_pause()
 	if not game_manager.resume_game():
 		return false
-	wave_manager.resume_pending_wave()
 	return true
 
 func _on_wave_completed_checkpoint(_wave: int) -> void:
-	if not safe_wave_checkpoints or game_manager.is_game_over():
+	if game_manager.is_game_over():
 		return
-	if game_manager.pause_game():
-		hud.pause_ui.show_pause()
-		hud.pause_ui.set_message("Punto seguro entre oleadas.")
+	if game_manager.enter_between_waves():
+		hud.show_between_waves(wave_manager.current_wave, wave_manager.total_kills, player.health.current_health, player.health.max_health)
+
+func continue_between_waves() -> bool:
+	if game_manager.is_game_over():
+		return false
+	hud.hide_between_waves()
+	return game_manager.continue_after_between_waves()
 
 func _sync_hud() -> void:
 	hud.update_wave(wave_manager.current_wave, wave_manager.remaining_enemies)

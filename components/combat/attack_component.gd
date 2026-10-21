@@ -58,7 +58,7 @@ func _recalcular_estadisticas() -> void:
 	if estadisticas_arma != null and estadisticas_arma.is_valid():
 		dano_base = estadisticas_arma.damage
 		alcance_base = estadisticas_arma.attack_range
-		costo_vida_efectivo = estadisticas_arma.health_cost
+		costo_vida_efectivo = estadisticas_arma.get_health_cost()
 		tiempo_recarga_efectivo = estadisticas_arma.cooldown
 	else:
 		costo_vida_efectivo = costo_vida

@@ -72,6 +72,8 @@ func stop_waves() -> void:
 func start_next_wave() -> void:
 	if not waves_enabled or wave_active:
 		return
+	if current_wave > 0 and not next_wave_pending:
+		return
 
 	var game_manager := get_parent().get_node_or_null("GameManager")
 	if game_manager != null and not game_manager.can_process_waves():
@@ -144,8 +146,14 @@ func spawn_enemy() -> void:
 
 
 func resume_pending_wave() -> void:
-	if next_wave_pending:
-		start_next_wave()
+	start_pending_wave()
+
+func start_pending_wave() -> bool:
+	if not next_wave_pending:
+		return false
+	var previous_wave := current_wave
+	start_next_wave()
+	return wave_active and current_wave == previous_wave + 1
 
 func restore_statistics(wave: int, kills: int) -> bool:
 	if wave < 0 or kills < 0: return false
@@ -204,7 +212,6 @@ func complete_wave() -> void:
 
 	wave_completed.emit(current_wave)
 	next_wave_pending = true
-	call_deferred("start_next_wave")
 
 	print(
 		"Oleada ", current_wave,

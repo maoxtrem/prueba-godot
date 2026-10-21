@@ -63,6 +63,10 @@ func _run() -> void:
 	Input.parse_input_event(open_event)
 	await process_frame
 	_check(not quest_ui.visible and not paused, "cerrar misiones con J y reanudar")
+	# El recurso de Debug de la escena está configurado para pruebas de movimiento;
+	# desactivarlo aquí permite comprobar de forma determinista GAME_OVER.
+	main_instance.debug_settings.debug_enabled = false
+	main_instance.player.configure_debug(main_instance.debug_settings)
 	main_instance.get_node("Player/HealthComponent").take_damage(100.0)
 	Input.parse_input_event(open_event)
 	await process_frame

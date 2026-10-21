@@ -8,15 +8,16 @@ signal restart_requested
 # REFERENCIAS DE LA INTERFAZ
 # ==========================================
 
-@onready var wave_label: Label = $Interface/WaveLabel
-@onready var enemies_label: Label = $Interface/EnemiesLabel
-@onready var kills_label: Label = $Interface/KillsLabel
-@onready var health_bar: ProgressBar = $Interface/HealthBar
+@onready var wave_label: Label = $Interface/StatusPanel/Margin/VBox/WaveLabel
+@onready var enemies_label: Label = $Interface/StatusPanel/Margin/VBox/EnemiesLabel
+@onready var kills_label: Label = $Interface/StatusPanel/Margin/VBox/KillsLabel
+@onready var health_bar: ProgressBar = $Interface/StatusPanel/Margin/VBox/HealthBar
 @onready var inventory_ui: InventoryUI = $InventoryUI
 @onready var game_over_ui: GameOverUI = $GameOverUI
 @onready var upgrade_shop: UpgradeShop = $UpgradeShop
 @onready var quest_ui: QuestUI = $QuestUI
 @onready var pause_ui: PauseUI = $PauseUI
+@onready var between_waves_ui: BetweenWavesUI = $BetweenWavesUI
 
 
 # ==========================================
@@ -88,6 +89,7 @@ func show_game_over(wave: int, total_kills: int) -> void:
 	upgrade_shop.visible = false
 	quest_ui.hide_quests()
 	pause_ui.hide_pause()
+	between_waves_ui.hide_rest()
 	game_over_ui.show_game_over(wave, total_kills)
 
 
@@ -101,6 +103,16 @@ func show_upgrade_shop(upgrades: UpgradeManager, health: HealthComponent) -> voi
 
 func close_upgrade_shop() -> void:
 	upgrade_shop.hide_shop()
+
+func show_between_waves(wave: int, kills: int, current_health: float, maximum_health: float) -> void:
+	inventory_ui.close_inventory()
+	upgrade_shop.visible = false
+	quest_ui.hide_quests()
+	pause_ui.hide_pause()
+	between_waves_ui.show_rest(wave, kills, current_health, maximum_health)
+
+func hide_between_waves() -> void:
+	between_waves_ui.hide_rest()
 
 
 func _on_restart_requested() -> void:

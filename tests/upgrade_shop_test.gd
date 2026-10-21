@@ -10,6 +10,7 @@ func _run() -> void:
 	root.add_child(main_instance)
 	set_current_scene(main_instance)
 	await process_frame
+	main_instance.player.configure_debug(null)
 
 	var manager: GameManager = main_instance.get_node("GameManager")
 	var waves: WaveManager = main_instance.get_node("WaveManager")
@@ -42,21 +43,19 @@ func _run() -> void:
 	_check(manager.current_state == GameManager.GameState.PLAYING, "cerrar tienda con B")
 	_check(not paused and not shop.visible, "reanudar al cerrar con B")
 
-	waves.wave_completed.connect(func(_wave: int) -> void:
-		main_instance.open_upgrade_shop()
-	)
 	var enemies: Array[Node] = main_instance.get_node("EnemyContainer").get_children()
 	for enemy in enemies:
 		enemy.health.take_damage(1000.0)
 	await process_frame
-	_check(manager.current_state == GameManager.GameState.UPGRADE_SELECTION, "abrir tienda al solicitarla durante finalización")
-	_check(shop.visible and waves.next_wave_pending, "conservar oleada diferida mientras la tienda está abierta")
+	var rest_ui: BetweenWavesUI = main_instance.get_node("HUD/BetweenWavesUI")
+	_check(manager.current_state == GameManager.GameState.BETWEEN_WAVES, "entrar en descanso entre oleadas")
+	_check(rest_ui.visible and waves.next_wave_pending, "mostrar punto seguro y conservar oleada pendiente")
 	var wave_before := waves.current_wave
-	Input.parse_input_event(_key_event(KEY_B))
+	main_instance.continue_between_waves()
 	await process_frame
-	_check(manager.current_state == GameManager.GameState.PLAYING, "volver a PLAYING al cerrar")
+	_check(manager.current_state == GameManager.GameState.PLAYING, "volver a PLAYING al continuar")
 	_check(waves.current_wave == wave_before + 1, "reanudar una única oleada pendiente")
-	_check(not shop.visible, "no cerrar ni reabrir por la oleada")
+	_check(not rest_ui.visible and not shop.visible, "ocultar el punto seguro sin abrir la tienda")
 	waves.start_next_wave()
 	_check(waves.current_wave == wave_before + 1, "evitar oleadas duplicadas")
 

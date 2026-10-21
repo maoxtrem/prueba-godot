@@ -66,6 +66,8 @@ func _run() -> void:
 	await process_frame
 	var main_upgrades: UpgradeManager = main_instance.get_node("Player/UpgradeManager")
 	var main_health: HealthComponent = main_instance.get_node("Player/HealthComponent")
+	main_instance.debug_settings.debug_enabled = false
+	main_instance.player.configure_debug(main_instance.debug_settings)
 	main_health.take_damage(100.0)
 	_check(not main_upgrades.purchase_upgrade("light_legs"), "rechazar compras en GAME_OVER")
 

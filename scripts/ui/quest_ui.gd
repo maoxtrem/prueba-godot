@@ -1,7 +1,7 @@
 extends Control
 class_name QuestUI
 
-@onready var quest_list: VBoxContainer = $Panel/Margin/VBox/QuestList
+@onready var quest_list: VBoxContainer = $Panel/Margin/VBox/Body/QuestList
 @onready var close_button: Button = $Panel/Margin/VBox/Header/CloseButton
 @onready var message_label: Label = $Panel/Margin/VBox/Message
 var quest_manager: QuestManager
@@ -36,6 +36,9 @@ func _input(event: InputEvent) -> void:
 
 func show_quests() -> void:
 	if quest_manager == null: return
+	var scene := get_tree().current_scene
+	if scene != null and scene.has_method("is_game_over") and scene.is_game_over():
+		return
 	_refresh()
 	visible = true
 	close_button.grab_focus()
@@ -50,6 +53,12 @@ func _build_cards() -> void:
 	for quest in quest_manager.available_quests:
 		if quest == null: continue
 		var panel := PanelContainer.new()
+		panel.custom_minimum_size = Vector2(0, 126)
+		var card_margin := MarginContainer.new()
+		card_margin.add_theme_constant_override("margin_left", 14)
+		card_margin.add_theme_constant_override("margin_top", 10)
+		card_margin.add_theme_constant_override("margin_right", 14)
+		card_margin.add_theme_constant_override("margin_bottom", 10)
 		var box := VBoxContainer.new()
 		var title := Label.new(); title.text = quest.display_name
 		var description := Label.new(); description.text = quest.description; description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -57,7 +66,7 @@ func _build_cards() -> void:
 		var reward_label := Label.new()
 		var button := Button.new(); button.text = "Reclamar"; button.pressed.connect(_on_claim_pressed.bind(quest.id))
 		box.add_child(title); box.add_child(description); box.add_child(progress_label); box.add_child(reward_label); box.add_child(button)
-		panel.add_child(box); quest_list.add_child(panel)
+		panel.add_child(card_margin); card_margin.add_child(box); quest_list.add_child(panel)
 		cards.append({"quest": quest, "progress": progress_label, "reward": reward_label, "button": button})
 	_refresh()
 

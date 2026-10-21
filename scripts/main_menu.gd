@@ -38,3 +38,6 @@ func save_current_game() -> Dictionary:
 
 func can_save_game() -> bool:
 	return game.can_save_game()
+
+func continue_between_waves() -> bool:
+	return game.continue_between_waves()
