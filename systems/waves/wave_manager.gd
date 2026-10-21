@@ -40,6 +40,7 @@ var total_kills: int = 0
 var wave_active: bool = false
 var waves_enabled: bool = true
 var deferred_start_token: int = 0
+var next_wave_pending: bool = false
 
 
 # ==========================================
@@ -60,6 +61,7 @@ func _start_deferred(token: int) -> void:
 func stop_waves() -> void:
 	wave_active = false
 	waves_enabled = false
+	next_wave_pending = false
 	deferred_start_token += 1
 
 
@@ -73,11 +75,14 @@ func start_next_wave() -> void:
 
 	var game_manager := get_parent().get_node_or_null("GameManager")
 	if game_manager != null and not game_manager.can_process_waves():
+		next_wave_pending = true
 		return
 
 	if enemy_scene == null:
 		push_error("WaveManager: falta asignar enemy_scene")
 		return
+
+	next_wave_pending = false
 
 	current_wave += 1
 	wave_active = true
@@ -138,6 +143,11 @@ func spawn_enemy() -> void:
 	)
 
 
+func resume_pending_wave() -> void:
+	if next_wave_pending:
+		start_next_wave()
+
+
 # ==========================================
 # ENEMIGO ELIMINADO
 # ==========================================
@@ -184,6 +194,8 @@ func complete_wave() -> void:
 	wave_active = false
 
 	wave_completed.emit(current_wave)
+	next_wave_pending = true
+	call_deferred("start_next_wave")
 
 	print(
 		"Oleada ", current_wave,

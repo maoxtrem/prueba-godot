@@ -1,19 +1,19 @@
 extends Control
 class_name UpgradeShop
 
-signal continue_requested
+signal close_requested
 
 @onready var health_label: Label = $Panel/Margin/VBox/HealthLabel
 @onready var message_label: Label = $Panel/Margin/VBox/Message
-@onready var continue_button: Button = $Panel/Margin/VBox/ContinueButton
+@onready var close_button: Button = $Panel/Margin/VBox/CloseButton
 
 var upgrade_manager: UpgradeManager
 var health: HealthComponent
 var cards: Array[Dictionary] = []
 
 func _ready() -> void:
-	process_mode = Node.PROCESS_MODE_WHEN_PAUSED
-	continue_button.pressed.connect(_on_continue_pressed)
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	close_button.pressed.connect(_on_close_pressed)
 	for index in range(4):
 		var card := $Panel/Margin/VBox/Upgrades.get_child(index)
 		cards.append({
@@ -26,6 +26,18 @@ func _ready() -> void:
 		})
 		cards[index].button.pressed.connect(_on_buy_pressed.bind(index))
 	visible = false
+
+func _input(event: InputEvent) -> void:
+	if not event.is_action_pressed("toggle_upgrade_shop"):
+		return
+	var current_scene := get_tree().current_scene
+	if current_scene == null:
+		return
+	if visible and current_scene.has_method("close_upgrade_shop"):
+		current_scene.close_upgrade_shop()
+	elif not visible and current_scene.has_method("open_upgrade_shop"):
+		current_scene.open_upgrade_shop()
+	get_viewport().set_input_as_handled()
 
 func set_sources(manager: UpgradeManager, health_component: HealthComponent) -> void:
 	if upgrade_manager != null:
@@ -46,7 +58,7 @@ func show_shop() -> void:
 		return
 	_refresh()
 	visible = true
-	continue_button.grab_focus()
+	close_button.grab_focus()
 
 func hide_shop() -> void:
 	visible = false
@@ -84,5 +96,8 @@ func _on_buy_pressed(index: int) -> void:
 	message_label.text = "Mejora adquirida: %s" % data.display_name
 	_refresh()
 
-func _on_continue_pressed() -> void:
-	continue_requested.emit()
+func _on_close_pressed() -> void:
+	close_requested.emit()
+	var current_scene := get_tree().current_scene
+	if current_scene != null and current_scene.has_method("close_upgrade_shop"):
+		current_scene.close_upgrade_shop()

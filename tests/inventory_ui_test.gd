@@ -20,15 +20,20 @@ func _run() -> void:
 	var description_name = inventory_ui.get_node("InventoryWindow/Margin/VBox/Description/DescriptionMargin/DescriptionVBox/Name")
 
 	_check(InputMap.has_action("toggle_inventory"), "registrar acción toggle_inventory")
-	_check(inventory_ui.process_mode == Node.PROCESS_MODE_WHEN_PAUSED, "procesar UI durante pausa")
+	_check(inventory_ui.process_mode == Node.PROCESS_MODE_ALWAYS, "procesar UI durante juego y pausa")
 	_check(grid.get_child_count() == 20, "mostrar exactamente 20 espacios")
 	_check(not inventory_ui.visible, "iniciar con inventario cerrado")
+	var debug_settings: DebugSettings = main_instance.debug_settings.duplicate()
+	debug_settings.debug_enabled = true
+	main_instance.debug_settings = debug_settings
+	main_instance.player.configure_debug(debug_settings)
 
 	var toggle_event := InputEventKey.new()
 	toggle_event.keycode = KEY_I
 	toggle_event.physical_keycode = KEY_I
 	toggle_event.pressed = true
-	inventory_ui._input(toggle_event)
+	Input.parse_input_event(toggle_event)
+	await process_frame
 	_check(inventory_ui.visible and paused, "abrir inventario con I y pausar")
 
 	var material = load("res://resources/items/test_material.tres")
@@ -43,13 +48,22 @@ func _run() -> void:
 	close_event.keycode = KEY_I
 	close_event.physical_keycode = KEY_I
 	close_event.pressed = true
-	inventory_ui._input(close_event)
+	Input.parse_input_event(close_event)
+	await process_frame
 	_check(not inventory_ui.visible and not paused, "cerrar inventario con I y reanudar")
 
 	inventory_ui.open_inventory()
 	_check(inventory_ui.visible and paused, "abrir de nuevo")
 	inventory_ui.close_button.emit_signal("pressed")
 	_check(not inventory_ui.visible and not paused, "cerrar mediante X")
+
+	main_instance.get_node("GameManager").current_state = GameManager.GameState.UPGRADE_SELECTION
+	paused = true
+	Input.parse_input_event(toggle_event)
+	await process_frame
+	_check(not inventory_ui.visible, "bloquear I durante selección de mejoras")
+	main_instance.get_node("GameManager").current_state = GameManager.GameState.PLAYING
+	paused = false
 
 	inventory_ui.open_inventory()
 	main_instance.get_node("GameManager").current_state = GameManager.GameState.GAME_OVER

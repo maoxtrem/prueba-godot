@@ -152,7 +152,7 @@ custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
 text = "Comprar"
 
-[node name="ContinueButton" type="Button" parent="Panel/Margin/VBox"]
+[node name="CloseButton" type="Button" parent="Panel/Margin/VBox"]
 custom_minimum_size = Vector2(0, 42)
 layout_mode = 2
-text = "Continuar"
+text = "Cerrar"

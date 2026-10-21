@@ -24,8 +24,6 @@ func setup(health: HealthComponent, waves: WaveManager) -> void:
 	wave_manager = waves
 	if player_health != null and not player_health.died.is_connected(_on_player_died):
 		player_health.died.connect(_on_player_died)
-	if wave_manager != null and not wave_manager.wave_completed.is_connected(_on_wave_completed):
-		wave_manager.wave_completed.connect(_on_wave_completed)
 
 
 func start_game() -> bool:
@@ -60,8 +58,6 @@ func enter_upgrade_selection() -> bool:
 
 	_change_state(GameState.UPGRADE_SELECTION)
 	get_tree().paused = true
-	if wave_manager != null:
-		wave_manager.wave_active = false
 	upgrade_selection_started.emit(wave_manager.current_wave if wave_manager != null else 0)
 	return true
 
@@ -73,7 +69,7 @@ func continue_after_upgrades() -> bool:
 	_change_state(GameState.PLAYING)
 	get_tree().paused = false
 	if wave_manager != null:
-		wave_manager.start_next_wave()
+		wave_manager.resume_pending_wave()
 	return true
 
 
@@ -124,12 +120,6 @@ func can_receive_rewards() -> bool:
 
 func _on_player_died() -> void:
 	enter_game_over()
-
-
-func _on_wave_completed(wave: int) -> void:
-	if current_state != GameState.PLAYING:
-		return
-	enter_upgrade_selection()
 
 
 func _change_state(new_state: GameState) -> void:

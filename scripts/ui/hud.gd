@@ -30,7 +30,6 @@ var kills: int = 0
 
 func _ready() -> void:
 	game_over_ui.restart_requested.connect(_on_restart_requested)
-	upgrade_shop.continue_requested.connect(_on_upgrade_shop_continue)
 	update_wave(0, 0)
 	update_enemies(0)
 	update_kills(0)
@@ -102,13 +101,6 @@ func close_upgrade_shop() -> void:
 
 func _on_restart_requested() -> void:
 	restart_requested.emit()
-
-
-func _on_upgrade_shop_continue() -> void:
-	upgrade_shop.hide_shop()
-	var current_scene := get_tree().current_scene
-	if current_scene != null and current_scene.has_method("continue_after_upgrades"):
-		current_scene.continue_after_upgrades()
 
 
 func set_inventory(inventory: InventoryComponent) -> void:

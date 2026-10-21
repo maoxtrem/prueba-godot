@@ -6,7 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://cot48h2dhdu87" path="res://scenes/enemies/enemy.tscn" id="3_tbgi4"]
 [ext_resource type="Script" uid="uid://b2nxk6x1ab3vd" path="res://systems/waves/wave_manager.gd" id="4_tbgi4"]
 [ext_resource type="Script" uid="uid://dcb3fcjaatm3j" path="res://systems/game/game_manager.gd" id="5_game_manager"]
-[ext_resource type="Resource" path="res://resources/debug/debug_settings.tres" id="6_debug_settings"]
+[ext_resource type="Resource" uid="uid://bsrbtx8ofhfob" path="res://resources/debug/debug_settings.tres" id="6_debug_settings"]
 
 [node name="Main" type="Node2D" unique_id=1429946689]
 script = ExtResource("1_jyhfs")

@@ -25,7 +25,8 @@ var was_paused_before_open: bool = false
 
 
 func _ready() -> void:
-	process_mode = Node.PROCESS_MODE_WHEN_PAUSED
+	# Debe recibir I durante PLAYING y también mientras el inventario pausa el árbol.
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	close_button.pressed.connect(close_inventory)
 	equip_button.pressed.connect(_on_equip_pressed)
 	unequip_button.pressed.connect(_on_unequip_pressed)
