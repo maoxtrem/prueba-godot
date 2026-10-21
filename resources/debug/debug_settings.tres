@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="DebugSettings" format=3 uid="uid://bsrbtx8ofhfob"]
+
+[ext_resource type="Script" uid="uid://yukiwrbgoqbb" path="res://systems/debug/debug_settings.gd" id="1_debug"]
+
+[resource]
+script = ExtResource("1_debug")
+debug_enabled = true
+player_invulnerable = true

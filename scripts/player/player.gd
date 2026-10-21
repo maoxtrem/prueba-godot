@@ -10,6 +10,7 @@ extends CharacterBody2D
 @onready var componente_ataque: AttackComponent = $AttackComponent
 @onready var equipamiento: EquipmentComponent = $EquipmentComponent
 var velocidad_efectiva: float
+var debug_settings: DebugSettings
 
 func _ready() -> void:
 	velocidad_efectiva = velocidad
@@ -67,8 +68,20 @@ func aplicar_velocidad_efectiva(valor: float) -> void:
 	velocidad_efectiva = maxf(valor, 0.0)
 
 
+func configure_debug(settings: DebugSettings) -> void:
+	debug_settings = settings
+	health.configure_debug(settings, true)
+
+
 func recibir_dano(cantidad: float) -> void:
 	health.take_damage(cantidad)
+
+
+func recibir_dano_de_enemigo(cantidad: float) -> void:
+	var multiplicador := 1.0
+	if debug_settings != null:
+		multiplicador = debug_settings.get_enemy_damage_multiplier()
+	health.take_damage(cantidad * multiplicador)
 
 
 func recuperar_vida(cantidad: float) -> void:

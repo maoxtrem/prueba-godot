@@ -109,6 +109,10 @@ func spawn_enemy() -> void:
 	if not waves_enabled:
 		return
 
+	var game_manager := get_parent().get_node_or_null("GameManager")
+	if game_manager != null and not game_manager.can_process_waves():
+		return
+
 	var enemy := enemy_scene.instantiate() as Enemy
 
 	if enemy == null:

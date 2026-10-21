@@ -1,6 +1,8 @@
 
 extends Node2D
 
+@export var debug_settings: DebugSettings
+
 # ==========================================
 # REFERENCIAS
 # ==========================================
@@ -19,6 +21,7 @@ extends Node2D
 # ==========================================
 
 func _ready() -> void:
+	player.configure_debug(debug_settings)
 	game_manager.setup(player.health, wave_manager)
 	upgrades.setup(player.health, player.componente_ataque, player.costo_movimiento, player, game_manager)
 	game_manager.game_over_reached.connect(_on_game_over_reached)

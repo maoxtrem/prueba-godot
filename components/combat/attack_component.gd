@@ -99,6 +99,11 @@ func atacar(
 	tiempo_restante = tiempo_recarga_efectivo
 
 	if objetivo != null:
-		objetivo.recibir_dano(dano_efectivo)
+		var atacante := get_parent()
+		var es_ataque_de_enemigo := atacante != null and atacante.is_in_group("enemigos")
+		if es_ataque_de_enemigo and objetivo.has_method("recibir_dano_de_enemigo"):
+			objetivo.recibir_dano_de_enemigo(dano_efectivo)
+		else:
+			objetivo.recibir_dano(dano_efectivo)
 
 	return true

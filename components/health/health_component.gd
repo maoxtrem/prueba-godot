@@ -9,6 +9,13 @@ signal died
 
 var current_health: float = 0.0
 var is_dead: bool = false
+var debug_settings: DebugSettings
+var debug_player_context: bool = false
+
+
+func configure_debug(settings: DebugSettings, is_player: bool = false) -> void:
+	debug_settings = settings
+	debug_player_context = is_player
 
 func _ready() -> void:
 	current_health = max_health
@@ -24,6 +31,10 @@ func reset_health() -> void:
 func take_damage(amount: float) -> void:
 	if is_dead or amount <= 0.0:
 		return
+	if debug_player_context and debug_settings != null and debug_settings.is_player_invulnerable():
+		return
+	if debug_player_context and debug_settings != null and debug_settings.has_infinite_health():
+		return
 
 	current_health = maxf(current_health - amount, 0.0)
 	_notify_change()
@@ -33,6 +44,8 @@ func take_damage(amount: float) -> void:
 func spend_health(amount: float) -> bool:
 	if is_dead or amount <= 0.0:
 		return false
+	if debug_player_context and debug_settings != null and debug_settings.has_infinite_health():
+		return true
 
 	if current_health <= amount:
 		return false
@@ -66,6 +79,8 @@ func _notify_change() -> void:
 
 func drain_health(amount: float) -> void:
 	if is_dead or amount <= 0.0:
+		return
+	if debug_player_context and debug_settings != null and debug_settings.has_infinite_health():
 		return
 
 	current_health = maxf(
