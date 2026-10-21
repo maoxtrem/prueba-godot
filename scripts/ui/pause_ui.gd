@@ -13,13 +13,6 @@ func _ready() -> void:
 	menu_button.pressed.connect(_on_menu_pressed)
 	visible = false
 
-func _input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_cancel"):
-		var scene := get_tree().current_scene
-		if scene != null and scene.has_method("toggle_pause_menu"):
-			scene.toggle_pause_menu()
-		get_viewport().set_input_as_handled()
-
 func show_pause() -> void:
 	message_label.text = ""
 	visible = true

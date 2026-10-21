@@ -27,18 +27,6 @@ func _ready() -> void:
 		cards[index].button.pressed.connect(_on_buy_pressed.bind(index))
 	visible = false
 
-func _input(event: InputEvent) -> void:
-	if not event.is_action_pressed("toggle_upgrade_shop"):
-		return
-	var current_scene := get_tree().current_scene
-	if current_scene == null:
-		return
-	if visible and current_scene.has_method("close_upgrade_shop"):
-		current_scene.close_upgrade_shop()
-	elif not visible and current_scene.has_method("open_upgrade_shop"):
-		current_scene.open_upgrade_shop()
-	get_viewport().set_input_as_handled()
-
 func set_sources(manager: UpgradeManager, health_component: HealthComponent) -> void:
 	if upgrade_manager != null:
 		if upgrade_manager.upgrades_changed.is_connected(_refresh):

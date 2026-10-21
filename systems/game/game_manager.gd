@@ -32,6 +32,9 @@ func start_game() -> bool:
 		return false
 
 	_change_state(GameState.PLAYING)
+	# Una partida nueva nunca debe heredar una pausa del menú o de una
+	# instancia anterior del juego.
+	get_tree().paused = false
 	return true
 
 
@@ -64,11 +67,16 @@ func enter_between_waves() -> bool:
 func continue_after_between_waves() -> bool:
 	if current_state != GameState.BETWEEN_WAVES:
 		return false
+	if wave_manager == null or not wave_manager.next_wave_pending:
+		return false
 	_change_state(GameState.PLAYING)
 	get_tree().paused = false
-	if wave_manager != null:
-		wave_manager.start_pending_wave()
-	return true
+	var started := wave_manager.start_pending_wave()
+	if not started:
+		# No perder el punto seguro si el inicio no pudo completarse.
+		_change_state(GameState.BETWEEN_WAVES)
+		get_tree().paused = true
+	return started
 
 
 func restore_state_for_load(saved_state: int) -> bool:

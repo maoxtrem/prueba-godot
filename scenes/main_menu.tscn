@@ -1,15 +1,16 @@
 [gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/main_menu.gd" id="1_menu"]
-[ext_resource type="PackedScene" path="res://scenes/main.tscn" id="2_main"]
 [ext_resource type="Theme" path="res://resources/themes/game_ui_theme.tres" id="3_theme"]
 
-[node name="MainMenu" type="Node2D"]
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1_menu")
-
-[node name="Main" parent="." instance=ExtResource("2_main")]
-start_in_menu = true
-safe_wave_checkpoints = true
 
 [node name="MenuUI" type="Control" parent="."]
 layout_mode = 3
@@ -31,53 +32,55 @@ grow_vertical = 2
 mouse_filter = 1
 color = Color(0.027, 0.035, 0.05, 0.88)
 
-[node name="Panel" type="PanelContainer" parent="MenuUI"]
-custom_minimum_size = Vector2(500, 430)
+[node name="Center" type="CenterContainer" parent="MenuUI"]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -250.0
-offset_top = -215.0
-offset_right = 250.0
-offset_bottom = 215.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
-[node name="Margin" type="MarginContainer" parent="MenuUI/Panel"]
+[node name="MenuPanel" type="PanelContainer" parent="MenuUI/Center"]
+custom_minimum_size = Vector2(500, 430)
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="MenuUI/Center/MenuPanel"]
 layout_mode = 2
 theme_override_constants/margin_left = 24
 theme_override_constants/margin_top = 24
 theme_override_constants/margin_right = 24
 theme_override_constants/margin_bottom = 24
 
-[node name="VBox" type="VBoxContainer" parent="MenuUI/Panel/Margin"]
+[node name="VBox" type="VBoxContainer" parent="MenuUI/Center/MenuPanel/Margin"]
 layout_mode = 2
 theme_override_constants/separation = 14
 
-[node name="Title" type="Label" parent="MenuUI/Panel/Margin/VBox"]
+[node name="Title" type="Label" parent="MenuUI/Center/MenuPanel/Margin/VBox"]
 layout_mode = 2
 text = "Último Refugio"
 horizontal_alignment = 1
 theme_override_font_sizes/font_size = 28
 
-[node name="NewGameButton" type="Button" parent="MenuUI/Panel/Margin/VBox"]
+[node name="NewGameButton" type="Button" parent="MenuUI/Center/MenuPanel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 text = "Nueva partida"
 
-[node name="ContinueButton" type="Button" parent="MenuUI/Panel/Margin/VBox"]
+[node name="ContinueButton" type="Button" parent="MenuUI/Center/MenuPanel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 text = "Continuar partida"
 
-[node name="QuitButton" type="Button" parent="MenuUI/Panel/Margin/VBox"]
+[node name="QuitButton" type="Button" parent="MenuUI/Center/MenuPanel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 text = "Salir"
 
-[node name="Message" type="Label" parent="MenuUI/Panel/Margin/VBox"]
+[node name="Message" type="Label" parent="MenuUI/Center/MenuPanel/Margin/VBox"]
 layout_mode = 2
 autowrap_mode = 2
 horizontal_alignment = 1
 
-[connection signal="pressed" from="MenuUI/Panel/Margin/VBox/NewGameButton" to="." method="_on_new_game_pressed"]
-[connection signal="pressed" from="MenuUI/Panel/Margin/VBox/ContinueButton" to="." method="_on_continue_pressed"]
-[connection signal="pressed" from="MenuUI/Panel/Margin/VBox/QuitButton" to="." method="_on_quit_pressed"]
+[connection signal="pressed" from="MenuUI/Center/MenuPanel/Margin/VBox/NewGameButton" to="." method="_on_new_game_pressed"]
+[connection signal="pressed" from="MenuUI/Center/MenuPanel/Margin/VBox/ContinueButton" to="." method="_on_continue_pressed"]
+[connection signal="pressed" from="MenuUI/Center/MenuPanel/Margin/VBox/QuitButton" to="." method="_on_quit_pressed"]

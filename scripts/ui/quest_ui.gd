@@ -26,14 +26,6 @@ func set_manager(manager: QuestManager) -> void:
 		quest_manager.reward_pending.connect(_on_quest_event)
 		_build_cards()
 
-func _input(event: InputEvent) -> void:
-	if not event.is_action_pressed("toggle_quests"): return
-	var scene := get_tree().current_scene
-	if scene != null:
-		if visible and scene.has_method("close_quests"): scene.close_quests()
-		elif not visible and scene.has_method("open_quests"): scene.open_quests()
-	get_viewport().set_input_as_handled()
-
 func show_quests() -> void:
 	if quest_manager == null: return
 	var scene := get_tree().current_scene

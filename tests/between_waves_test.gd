@@ -11,9 +11,17 @@ func _run() -> void:
 	root.add_child(menu)
 	set_current_scene(menu)
 	await process_frame
-	var main_instance = menu.get_node("Main")
-	menu._on_new_game_pressed()
+	var new_game_button: Button = menu.get_node("MenuUI/Center/MenuPanel/Margin/VBox/NewGameButton")
+	new_game_button.emit_signal("pressed")
 	await process_frame
+	var main_instance: Node = menu.get_node("Main")
+	_check(main_instance.game_manager.current_state == GameManager.GameState.PLAYING, "Nueva partida cambia a PLAYING")
+	_check(not paused, "Nueva partida elimina la pausa residual")
+	_check(main_instance.wave_manager.current_wave == 1, "iniciar exactamente la primera oleada")
+	_check(main_instance.wave_manager.wave_active, "activar la primera oleada")
+	_check(main_instance.get_node("EnemyContainer").get_child_count() == 3, "generar tres enemigos iniciales")
+	_check(main_instance.hud.wave_label.text == "Oleada: 1", "actualizar HUD de oleada")
+	_check(main_instance.hud.enemies_label.text == "Enemigos: 3", "actualizar HUD de enemigos")
 
 	var waves: WaveManager = main_instance.wave_manager
 	var manager: GameManager = main_instance.game_manager

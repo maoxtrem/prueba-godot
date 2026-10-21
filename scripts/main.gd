@@ -27,6 +27,8 @@ extends Node2D
 # ==========================================
 
 func _ready() -> void:
+	# Centraliza las acciones de interfaz y sigue activo durante pausas modales.
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	player.configure_debug(debug_settings)
 	game_manager.setup(player.health, wave_manager)
 	upgrades.setup(player.health, player.componente_ataque, player.costo_movimiento, player, game_manager)
@@ -40,8 +42,6 @@ func _ready() -> void:
 	hud.set_consumables(consumables)
 	hud.set_weapon_upgrades(weapon_upgrades)
 	hud.set_quest_manager(quest_manager)
-	if not start_in_menu:
-		game_manager.start_game()
 
 	# Conectar eventos de las oleadas
 	wave_manager.wave_started.connect(
@@ -67,6 +67,11 @@ func _ready() -> void:
 		hud.update_health
 	)
 
+	# Todas las señales deben estar conectadas antes de permitir que empiece
+	# la primera oleada. WaveManager inicia mediante call_deferred().
+	if not start_in_menu:
+		game_manager.start_game()
+
 	# ======================================
 	# SINCRONIZAR ESTADO INICIAL
 	# ======================================
@@ -88,6 +93,78 @@ func _ready() -> void:
 		player.health.current_health,
 		player.health.max_health
 	)
+
+
+func _input(event: InputEvent) -> void:
+	var is_inventory := event.is_action_pressed("toggle_inventory")
+	var is_shop := event.is_action_pressed("toggle_upgrade_shop")
+	var is_quests := event.is_action_pressed("toggle_quests")
+	var is_cancel := event.is_action_pressed("ui_cancel")
+	if not is_inventory and not is_shop and not is_quests and not is_cancel:
+		return
+	if event is InputEventKey and event.echo:
+		return
+
+	if is_inventory:
+		_handle_inventory_input()
+	elif is_shop:
+		_handle_shop_input()
+	elif is_quests:
+		_handle_quests_input()
+	else:
+		_handle_cancel_input()
+	get_viewport().set_input_as_handled()
+
+
+func _handle_inventory_input() -> void:
+	if hud.inventory_ui.visible:
+		hud.inventory_ui.close_inventory()
+		return
+	if game_manager.current_state != GameManager.GameState.PLAYING or _has_open_modal():
+		return
+	hud.inventory_ui.open_inventory()
+
+
+func _handle_shop_input() -> void:
+	if hud.upgrade_shop.visible:
+		close_upgrade_shop()
+		return
+	if game_manager.current_state != GameManager.GameState.PLAYING or _has_open_modal():
+		return
+	open_upgrade_shop()
+
+
+func _handle_quests_input() -> void:
+	if hud.quest_ui.visible:
+		close_quests()
+		return
+	if game_manager.current_state != GameManager.GameState.PLAYING or _has_open_modal():
+		return
+	open_quests()
+
+
+func _handle_cancel_input() -> void:
+	if hud.between_waves_ui.visible or game_manager.current_state == GameManager.GameState.GAME_OVER:
+		return
+	if hud.inventory_ui.visible:
+		hud.inventory_ui.close_inventory()
+	elif hud.upgrade_shop.visible:
+		close_upgrade_shop()
+	elif hud.quest_ui.visible:
+		close_quests()
+	elif hud.pause_ui.visible:
+		close_pause_menu()
+	else:
+		toggle_pause_menu()
+
+
+func _has_open_modal() -> bool:
+	return hud.inventory_ui.visible \
+		or hud.upgrade_shop.visible \
+		or hud.quest_ui.visible \
+		or hud.pause_ui.visible \
+		or hud.between_waves_ui.visible \
+		or hud.game_over_ui.visible
 
 
 func _on_game_over_reached(wave: int, total_kills: int) -> void:
@@ -225,8 +302,10 @@ func _on_wave_completed_checkpoint(_wave: int) -> void:
 func continue_between_waves() -> bool:
 	if game_manager.is_game_over():
 		return false
-	hud.hide_between_waves()
-	return game_manager.continue_after_between_waves()
+	var continued := game_manager.continue_after_between_waves()
+	if continued:
+		hud.hide_between_waves()
+	return continued
 
 func _sync_hud() -> void:
 	hud.update_wave(wave_manager.current_wave, wave_manager.remaining_enemies)

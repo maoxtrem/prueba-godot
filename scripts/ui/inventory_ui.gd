@@ -101,15 +101,6 @@ func set_weapon_upgrades(target_upgrades: WeaponUpgradeManager) -> void:
 	_update_equipment_buttons()
 
 
-func _input(event: InputEvent) -> void:
-	if event.is_action_pressed("toggle_inventory"):
-		if visible:
-			close_inventory()
-		else:
-			open_inventory()
-		get_viewport().set_input_as_handled()
-
-
 func open_inventory() -> void:
 	if _is_game_over() or inventory == null:
 		return
