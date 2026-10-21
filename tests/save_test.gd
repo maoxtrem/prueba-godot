@@ -1,0 +1,85 @@
+extends SceneTree
+
+var checks := 0
+const SWORD := preload("res://resources/items/test_weapon.tres")
+const ARMOR := preload("res://resources/items/reinforced_cloth.tres")
+const MATERIAL := preload("res://resources/items/test_material.tres")
+const FURY := preload("res://resources/consumables/fury_elixir.tres")
+
+func _init() -> void:
+	call_deferred("_run")
+
+func _run() -> void:
+	var main_instance = load("res://scenes/main.tscn").instantiate()
+	root.add_child(main_instance)
+	set_current_scene(main_instance)
+	await process_frame
+	var save_manager: SaveManager = main_instance.get_node("SaveManager")
+	var test_repository := JsonSaveRepository.new()
+	test_repository.save_directory = "/tmp/ultimo_refugio_save_tests"
+	save_manager.repository = test_repository
+	var inventory: InventoryComponent = main_instance.get_node("Player/InventoryComponent")
+	var equipment: EquipmentComponent = main_instance.get_node("Player/EquipmentComponent")
+	var upgrades: UpgradeManager = main_instance.get_node("Player/UpgradeManager")
+	var quests: QuestManager = main_instance.get_node("QuestManager")
+	var waves: WaveManager = main_instance.get_node("WaveManager")
+	var effects: StatusEffectComponent = main_instance.get_node("Player/StatusEffectComponent")
+
+	inventory.add_item(SWORD, 2)
+	inventory.add_item(ARMOR, 1)
+	inventory.add_item(MATERIAL, 12)
+	var slots := inventory.get_slots()
+	slots[0].weapon_instance.upgrade_level = 1
+	slots[1].weapon_instance.upgrade_level = 2
+	_check(slots[0].weapon_instance.instance_id != slots[1].weapon_instance.instance_id, "mantener IDs de armas independientes")
+	_check(equipment.equip_item("rusty_sword", slots[0].weapon_instance.instance_id).success, "preparar arma equipada")
+	_check(equipment.equip_item("reinforced_cloth").success, "preparar armadura equipada")
+	upgrades.upgrade_levels["light_legs"] = 1
+	quests.register_enemy_kill(5)
+	effects.apply_effect(FURY)
+	var serialized := save_manager.serializer.serialize_game(main_instance, "phase12_test")
+	_check(serialized.schema_version == 1 and serialized.save_id == "phase12_test", "serializar versión e identificador")
+	_check(save_manager.serializer.validate(serialized).success, "validar partida serializada")
+	var saved := save_manager.save_game("phase12_test")
+	_check(saved.success, "guardar JSON local")
+	var loaded := save_manager.load_game("phase12_test")
+	_check(loaded.success, "cargar JSON local")
+	if not loaded.success:
+		quit()
+		return
+	var loaded_game: Dictionary = loaded.data.game
+	_check(loaded_game.inventory.slots.size() == 2 and loaded_game.inventory.slots[0].weapon_instance.upgrade_level == 2, "conservar inventario y nivel individual")
+	_check(loaded_game.equipment.weapon.instance_id == slots[0].weapon_instance.instance_id and loaded_game.equipment.armor_item_id == "reinforced_cloth", "conservar equipo")
+	_check(int(loaded_game.upgrades.light_legs) == 1, "conservar mejoras del personaje")
+	_check(int(loaded_game.quests.progress.first_kills) == 5 and loaded_game.wave.kills == waves.total_kills, "conservar misiones y estadísticas de oleada")
+	_check(loaded_game.temporary_effects.size() == 1, "reservar efectos temporales")
+
+	var missing := save_manager.load_game("slot_that_does_not_exist")
+	_check(not missing.success and missing.error == "file_not_found", "manejar archivo inexistente")
+	var corrupt_file := FileAccess.open("/tmp/ultimo_refugio_save_tests/save_corrupt_test.json", FileAccess.WRITE)
+	corrupt_file.store_string("{not valid json")
+	corrupt_file.close()
+	var corrupt_repository := JsonSaveRepository.new()
+	corrupt_repository.save_directory = "/tmp/ultimo_refugio_save_tests"
+	var corrupt := corrupt_repository.load_data("corrupt_test")
+	_check(not corrupt.success and corrupt.error == "invalid_json", "rechazar JSON corrupto")
+
+	var wrong_version := serialized.duplicate(true)
+	wrong_version.schema_version = 99
+	_check(not save_manager.serializer.validate(wrong_version).success, "rechazar versión incompatible")
+	var unknown_item := serialized.duplicate(true)
+	unknown_item.game.inventory.slots[0].item_id = "unknown_item_id"
+	_check(not save_manager.serializer.validate(unknown_item).success, "rechazar ID desconocido")
+	var duplicate_instance := serialized.duplicate(true)
+	var duplicate_entry: Dictionary = duplicate_instance.game.inventory.slots[0].duplicate(true)
+	duplicate_instance.game.inventory.slots.append(duplicate_entry)
+	_check(not save_manager.serializer.validate(duplicate_instance).success, "rechazar instancia duplicada")
+	_check(not JsonSaveRepository.new().save_data("../unsafe", serialized).success, "rechazar slot inseguro")
+
+	print("Save tests: ", checks, " comprobaciones correctas")
+	quit()
+
+func _check(condition: bool, description: String) -> void:
+	checks += 1
+	if not condition:
+		push_error("Fallo: " + description)

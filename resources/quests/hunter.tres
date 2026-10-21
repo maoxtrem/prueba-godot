@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="QuestData" load_steps=5 format=3]
+[ext_resource type="Script" path="res://systems/quests/quest_data.gd" id="1_q"]
+[ext_resource type="Script" path="res://systems/quests/quest_objective.gd" id="2_o"]
+[ext_resource type="Script" path="res://systems/quests/quest_reward.gd" id="3_r"]
+[ext_resource type="Resource" path="res://resources/items/test_material.tres" id="4_item"]
+[sub_resource type="Resource" id="Objective"]
+script = ExtResource("2_o")
+target_amount = 15
+[sub_resource type="Resource" id="Reward"]
+script = ExtResource("3_r")
+reward_type = 1
+amount = 10
+item_id = "blood_fragment"
+item = ExtResource("4_item")
+[resource]
+script = ExtResource("1_q")
+id = "hunter"
+display_name = "Cazador"
+description = "Elimina 15 enemigos."
+objectives = Array[ExtResource("2_o")]([SubResource("Objective")])
+rewards = Array[ExtResource("3_r")]([SubResource("Reward")])

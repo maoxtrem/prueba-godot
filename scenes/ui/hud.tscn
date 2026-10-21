@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/inventory_ui.tscn" id="2_inventory_ui"]
 [ext_resource type="PackedScene" path="res://scenes/ui/game_over_ui.tscn" id="3_game_over_ui"]
 [ext_resource type="PackedScene" path="res://scenes/ui/upgrade_shop.tscn" id="4_upgrade_shop"]
+[ext_resource type="PackedScene" path="res://scenes/ui/quest_ui.tscn" id="5_quest_ui"]
 
 [node name="HUD" type="CanvasLayer" unique_id=1296587215]
 script = ExtResource("1_0mwgc")
@@ -56,3 +57,5 @@ show_percentage = false
 [node name="GameOverUI" parent="." instance=ExtResource("3_game_over_ui")]
 
 [node name="UpgradeShop" parent="." instance=ExtResource("4_upgrade_shop")]
+
+[node name="QuestUI" parent="." instance=ExtResource("5_quest_ui")]

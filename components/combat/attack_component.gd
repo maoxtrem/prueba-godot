@@ -18,7 +18,9 @@ var tiempo_recarga_efectivo: float
 var multiplicador_dano_mejoras: float = 1.0
 var multiplicador_alcance_mejoras: float = 1.0
 var multiplicador_dano_consumible: float = 1.0
+var multiplicador_dano_arma: float = 1.0
 var estadisticas_arma: WeaponStats
+var arma_instance: WeaponInstance
 
 
 func _ready() -> void:
@@ -27,6 +29,15 @@ func _ready() -> void:
 
 func aplicar_estadisticas_arma(stats: WeaponStats) -> void:
 	estadisticas_arma = stats
+	arma_instance = null
+	multiplicador_dano_arma = 1.0
+	_recalcular_estadisticas()
+
+func aplicar_instancia_arma(instance: WeaponInstance) -> void:
+	arma_instance = instance
+	var stats: WeaponStats = null if instance == null else instance.item.weapon_stats
+	estadisticas_arma = stats
+	multiplicador_dano_arma = 1.0 if instance == null else instance.damage_multiplier()
 	_recalcular_estadisticas()
 
 
@@ -52,7 +63,7 @@ func _recalcular_estadisticas() -> void:
 	else:
 		costo_vida_efectivo = costo_vida
 		tiempo_recarga_efectivo = tiempo_recarga
-	dano_efectivo = dano_base * multiplicador_dano_mejoras * multiplicador_dano_consumible
+	dano_efectivo = dano_base * multiplicador_dano_arma * multiplicador_dano_mejoras * multiplicador_dano_consumible
 	alcance_efectivo = alcance_base * multiplicador_alcance_mejoras
 
 

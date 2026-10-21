@@ -7,6 +7,7 @@ enum EquipmentSlot {
 }
 
 signal equipment_changed(slot: EquipmentSlot, item: ItemData)
+signal weapon_instance_changed(instance: WeaponInstance)
 
 @export_node_path("Node") var inventory_path: NodePath = NodePath("../InventoryComponent")
 @export_node_path("Node") var health_path: NodePath = NodePath("../HealthComponent")
@@ -15,19 +16,21 @@ signal equipment_changed(slot: EquipmentSlot, item: ItemData)
 @onready var health: HealthComponent = get_node_or_null(health_path)
 
 var equipped_weapon: ItemData
+var equipped_weapon_instance: WeaponInstance
 var equipped_armor: ItemData
 
 
-func equip_item(item_id: String) -> Dictionary:
+func equip_item(item_id: String, instance_id: String = "") -> Dictionary:
 	if _blocked():
 		return _failure("player_dead" if _is_owner_dead() else "game_over")
 
 	if inventory == null or item_id.strip_edges().is_empty():
 		return _failure("invalid_item")
 
-	var item := _find_inventory_item(item_id)
-	if item == null:
+	var selected_slot := _find_inventory_slot(item_id, instance_id)
+	if selected_slot == null:
 		return _failure("not_in_inventory")
+	var item: ItemData = selected_slot.item
 
 	var target_slot: EquipmentSlot
 	if item.item_type == ItemData.ItemType.WEAPON:
@@ -43,23 +46,34 @@ func equip_item(item_id: String) -> Dictionary:
 	if previous != null and previous.id == item.id:
 		return _failure("already_equipped")
 
-	var remove_result := inventory.remove_item(item.id, 1)
-	if int(remove_result.get("removed", 0)) != 1:
+	var previous_weapon_instance := equipped_weapon_instance
+	var removed_slot_index := inventory.slots.find(selected_slot)
+	if removed_slot_index < 0:
 		return _failure("could_not_remove_item")
+	inventory.slots.remove_at(removed_slot_index)
+	inventory._emit_inventory_changed()
 
 	if previous != null:
-		var return_result := inventory.add_item(previous, 1)
+		var return_result := inventory.add_weapon_instance(previous_weapon_instance) if target_slot == EquipmentSlot.WEAPON else inventory.add_item(previous, 1)
 		if int(return_result.get("added", 0)) != 1:
-			inventory.add_item(item, 1)
+			if target_slot == EquipmentSlot.WEAPON:
+				inventory.add_weapon_instance(selected_slot.weapon_instance)
+			else:
+				inventory.add_item(item, 1)
 			return _failure("no_space_for_previous_item")
 
 	_set_equipped(target_slot, item)
+	if target_slot == EquipmentSlot.WEAPON:
+		equipped_weapon_instance = selected_slot.weapon_instance
 	equipment_changed.emit(target_slot, item)
+	if target_slot == EquipmentSlot.WEAPON:
+		weapon_instance_changed.emit(equipped_weapon_instance)
 	return {
 		"success": true,
 		"slot": target_slot,
 		"item": item,
 		"replaced": previous,
+		"instance": selected_slot.weapon_instance,
 	}
 
 
@@ -77,16 +91,27 @@ func unequip_item(slot: EquipmentSlot) -> Dictionary:
 		return _failure("nothing_equipped")
 	if inventory == null:
 		return _failure("missing_inventory")
-	var add_result := inventory.add_item(item_to_return, 1)
+	var add_result: Dictionary
+	if slot == EquipmentSlot.WEAPON:
+		add_result = inventory.add_weapon_instance(equipped_weapon_instance)
+	else:
+		add_result = inventory.add_item(item_to_return, 1)
 	if int(add_result.get("added", 0)) != 1:
 		return _failure("inventory_full")
 	_set_equipped(slot, null)
+	if slot == EquipmentSlot.WEAPON:
+		equipped_weapon_instance = null
 	equipment_changed.emit(slot, null)
+	if slot == EquipmentSlot.WEAPON:
+		weapon_instance_changed.emit(null)
 	return {"success": true, "slot": slot, "item": item_to_return}
 
 
 func get_equipped_item(slot: EquipmentSlot) -> ItemData:
 	return equipped_weapon if slot == EquipmentSlot.WEAPON else equipped_armor
+
+func get_equipped_weapon_instance() -> WeaponInstance:
+	return equipped_weapon_instance
 
 func get_enemy_damage_multiplier() -> float:
 	if equipped_armor == null or equipped_armor.armor_stats == null:
@@ -110,10 +135,11 @@ func _set_equipped(slot: EquipmentSlot, item: ItemData) -> void:
 		equipped_armor = item
 
 
-func _find_inventory_item(item_id: String) -> ItemData:
+func _find_inventory_slot(item_id: String, instance_id: String = "") -> InventorySlot:
 	for slot in inventory.get_slots():
 		if slot.item != null and slot.item.id == item_id and slot.quantity > 0:
-			return slot.item
+			if instance_id.is_empty() or (slot.weapon_instance != null and slot.weapon_instance.instance_id == instance_id):
+				return slot
 
 	return null
 

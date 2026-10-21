@@ -107,6 +107,10 @@ text = "Equipar"
 layout_mode = 2
 text = "Desequipar"
 
+[node name="UpgradeWeaponButton" type="Button" parent="InventoryWindow/Margin/VBox/EquipmentPanel/EquipmentMargin/EquipmentRow"]
+layout_mode = 2
+text = "Mejorar"
+
 [node name="ArmorRow" type="HBoxContainer" parent="InventoryWindow/Margin/VBox/EquipmentPanel/EquipmentMargin"]
 layout_mode = 2
 theme_override_constants/separation = 8
@@ -171,3 +175,12 @@ text = "Usar consumible"
 [node name="UseMessage" type="Label" parent="InventoryWindow/Margin/VBox/Description/DescriptionMargin/DescriptionVBox"]
 layout_mode = 2
 text = ""
+
+[node name="UpgradeInfo" type="Label" parent="InventoryWindow/Margin/VBox/Description/DescriptionMargin/DescriptionVBox"]
+layout_mode = 2
+text = ""
+autowrap_mode = 2
+
+[node name="UpgradeButton" type="Button" parent="InventoryWindow/Margin/VBox/Description/DescriptionMargin/DescriptionVBox"]
+layout_mode = 2
+text = "Mejorar arma"

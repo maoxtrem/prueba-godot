@@ -11,6 +11,7 @@
 [ext_resource type="Script" path="res://systems/upgrades/upgrade_manager.gd" id="9_upgrades"]
 [ext_resource type="Script" path="res://systems/consumables/status_effect_component.gd" id="15_status"]
 [ext_resource type="Script" path="res://systems/consumables/consumable_component.gd" id="16_consumable"]
+[ext_resource type="Script" path="res://systems/equipment/upgrades/weapon_upgrade_manager.gd" id="17_weapon_upgrades"]
 [ext_resource type="Resource" path="res://resources/upgrades/light_legs.tres" id="10_light"]
 [ext_resource type="Resource" path="res://resources/upgrades/efficient_step.tres" id="11_step"]
 [ext_resource type="Resource" path="res://resources/upgrades/sharpened_blood.tres" id="12_blood"]
@@ -74,6 +75,9 @@ script = ExtResource("16_consumable")
 inventory_path = NodePath("../InventoryComponent")
 health_path = NodePath("../HealthComponent")
 status_effect_path = NodePath("../StatusEffectComponent")
+
+[node name="WeaponUpgradeManager" type="Node" parent="."]
+script = ExtResource("17_weapon_upgrades")
 
 [node name="PickupComponent" type="Area2D" parent="." node_paths=PackedStringArray("inventory_path", "health_path")]
 collision_layer = 0

@@ -17,6 +17,14 @@ func add_item(item: ItemData, quantity: int) -> Dictionary:
 		}
 
 	var remaining := quantity
+	if item.item_type == ItemData.ItemType.WEAPON:
+		while remaining > 0 and slots.size() < capacity:
+			slots.append(InventorySlot.new(item, 1))
+			remaining -= 1
+		var added_weapons := quantity - remaining
+		if added_weapons > 0:
+			_emit_inventory_changed()
+		return {"success": remaining == 0, "added": added_weapons, "rejected": remaining}
 
 	# Primero se completan las pilas existentes del mismo ID.
 	for slot in slots:
@@ -48,6 +56,15 @@ func add_item(item: ItemData, quantity: int) -> Dictionary:
 		"added": added_total,
 		"rejected": remaining,
 	}
+
+func add_weapon_instance(instance: WeaponInstance) -> Dictionary:
+	if instance == null or instance.item == null or instance.item.item_type != ItemData.ItemType.WEAPON:
+		return {"success": false, "added": 0, "rejected": 1}
+	if slots.size() >= capacity:
+		return {"success": false, "added": 0, "rejected": 1}
+	slots.append(InventorySlot.new(instance.item, 1, instance))
+	_emit_inventory_changed()
+	return {"success": true, "added": 1, "rejected": 0}
 
 
 func remove_item(item_id: String, quantity: int) -> Dictionary:

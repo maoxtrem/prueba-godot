@@ -3,11 +3,14 @@ class_name InventorySlot
 
 var item: ItemData
 var quantity: int = 0
+var weapon_instance: WeaponInstance
 
 
-func _init(item_data: ItemData, initial_quantity: int = 0) -> void:
+func _init(item_data: ItemData, initial_quantity: int = 0, instance: WeaponInstance = null) -> void:
 	item = item_data
 	quantity = clampi(initial_quantity, 0, get_max_stack())
+	if item != null and item.item_type == ItemData.ItemType.WEAPON:
+		weapon_instance = instance if instance != null else WeaponInstance.new(item)
 
 
 func get_max_stack() -> int:

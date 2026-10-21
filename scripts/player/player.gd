@@ -18,6 +18,7 @@ func _ready() -> void:
 	health.health_changed.connect(actualizar_barra_vida)
 	health.died.connect(morir)
 	equipamiento.equipment_changed.connect(_on_equipment_changed)
+	equipamiento.weapon_instance_changed.connect(_on_weapon_instance_changed)
 	componente_ataque.aplicar_estadisticas_arma(null)
 
 	actualizar_barra_vida(
@@ -113,9 +114,12 @@ func _on_equipment_changed(
 		stats = item.weapon_stats
 
 	if _slot == EquipmentComponent.EquipmentSlot.WEAPON:
-		componente_ataque.aplicar_estadisticas_arma(stats)
+		componente_ataque.aplicar_instancia_arma(equipamiento.get_equipped_weapon_instance())
 	costo_movimiento.aplicar_multiplicador_armadura(equipamiento.get_armor_movement_cost_multiplier())
 	_recalcular_velocidad()
 
 func _recalcular_velocidad() -> void:
 	velocidad_efectiva = maxf(velocidad * multiplicador_velocidad_mejoras * equipamiento.get_armor_speed_multiplier(), 0.0)
+
+func _on_weapon_instance_changed(instance: WeaponInstance) -> void:
+	componente_ataque.aplicar_instancia_arma(instance)
