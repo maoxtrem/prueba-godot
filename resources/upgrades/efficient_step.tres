@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="UpgradeData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://systems/upgrades/upgrade_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "efficient_step"
+display_name = "Paso eficiente"
+description = "Reduce un 20% el costo de desplazamiento por nivel."
+health_cost = 15.0
+effect_type = 1
+effect_value = 0.2
+max_level = 3

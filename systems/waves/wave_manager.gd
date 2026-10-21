@@ -38,6 +38,8 @@ var current_wave: int = 0
 var remaining_enemies: int = 0
 var total_kills: int = 0
 var wave_active: bool = false
+var waves_enabled: bool = true
+var deferred_start_token: int = 0
 
 
 # ==========================================
@@ -45,11 +47,20 @@ var wave_active: bool = false
 # ==========================================
 
 func _ready() -> void:
-	call_deferred("start_next_wave")
+	var token := deferred_start_token
+	call_deferred("_start_deferred", token)
+
+
+func _start_deferred(token: int) -> void:
+	if token != deferred_start_token:
+		return
+	start_next_wave()
 
 
 func stop_waves() -> void:
 	wave_active = false
+	waves_enabled = false
+	deferred_start_token += 1
 
 
 # ==========================================
@@ -57,7 +68,11 @@ func stop_waves() -> void:
 # ==========================================
 
 func start_next_wave() -> void:
-	if wave_active:
+	if not waves_enabled or wave_active:
+		return
+
+	var game_manager := get_parent().get_node_or_null("GameManager")
+	if game_manager != null and not game_manager.can_process_waves():
 		return
 
 	if enemy_scene == null:
@@ -91,6 +106,9 @@ func start_next_wave() -> void:
 # ==========================================
 
 func spawn_enemy() -> void:
+	if not waves_enabled:
+		return
+
 	var enemy := enemy_scene.instantiate() as Enemy
 
 	if enemy == null:
@@ -121,7 +139,10 @@ func spawn_enemy() -> void:
 # ==========================================
 
 func on_enemy_died(_enemy: Node2D) -> void:
-	if not wave_active:
+	var game_manager := get_parent().get_node_or_null("GameManager")
+	if not wave_active or not waves_enabled:
+		return
+	if game_manager != null and not game_manager.can_process_waves():
 		return
 
 	# Incrementar eliminaciones totales
@@ -153,7 +174,7 @@ func on_enemy_died(_enemy: Node2D) -> void:
 # ==========================================
 
 func complete_wave() -> void:
-	if not wave_active:
+	if not wave_active or not waves_enabled:
 		return
 
 	wave_active = false
@@ -164,6 +185,3 @@ func complete_wave() -> void:
 		"Oleada ", current_wave,
         " completada"
 	)
-
-	# Iniciar siguiente oleada
-	call_deferred("start_next_wave")

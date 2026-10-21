@@ -1,14 +1,6 @@
 
 extends Node2D
 
-enum GameState {
-	PLAYING,
-	GAME_OVER,
-	RESTART,
-}
-
-var game_state: GameState = GameState.PLAYING
-
 # ==========================================
 # REFERENCIAS
 # ==========================================
@@ -18,6 +10,8 @@ var game_state: GameState = GameState.PLAYING
 @onready var hud: GameHUD = $HUD
 @onready var inventory: InventoryComponent = $Player/InventoryComponent
 @onready var equipment: EquipmentComponent = $Player/EquipmentComponent
+@onready var upgrades: UpgradeManager = $Player/UpgradeManager
+@onready var game_manager: GameManager = $GameManager
 
 
 # ==========================================
@@ -25,10 +19,14 @@ var game_state: GameState = GameState.PLAYING
 # ==========================================
 
 func _ready() -> void:
-	player.health.died.connect(_on_player_died)
+	game_manager.setup(player.health, wave_manager)
+	upgrades.setup(player.health, player.componente_ataque, player.costo_movimiento, player, game_manager)
+	game_manager.game_over_reached.connect(_on_game_over_reached)
+	game_manager.upgrade_selection_started.connect(_on_upgrade_selection_started)
 	hud.restart_requested.connect(_on_restart_requested)
 	hud.set_inventory(inventory)
 	hud.set_equipment(equipment)
+	game_manager.start_game()
 
 	# Conectar eventos de las oleadas
 	wave_manager.wave_started.connect(
@@ -73,23 +71,28 @@ func _ready() -> void:
 	)
 
 
-func _on_player_died() -> void:
-	if game_state != GameState.PLAYING:
-		return
+func _on_game_over_reached(wave: int, total_kills: int) -> void:
+	hud.show_game_over(wave, total_kills)
 
-	game_state = GameState.GAME_OVER
-	wave_manager.stop_waves()
-	get_tree().call_group(&"enemigos", &"detener")
-	hud.show_game_over()
+
+func _on_upgrade_selection_started(_wave: int) -> void:
+	hud.show_upgrade_shop(upgrades, player.health)
 
 
 func _on_restart_requested() -> void:
-	if game_state != GameState.GAME_OVER:
+	if not game_manager.request_restart():
 		return
 
-	game_state = GameState.RESTART
 	get_tree().reload_current_scene()
 
 
+func _on_upgrade_shop_continue() -> void:
+	game_manager.continue_after_upgrades()
+
+
 func is_game_over() -> bool:
-	return game_state == GameState.GAME_OVER
+	return game_manager.is_game_over()
+
+
+func continue_after_upgrades() -> bool:
+	return game_manager.continue_after_upgrades()

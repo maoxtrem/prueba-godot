@@ -12,9 +12,9 @@ signal restart_requested
 @onready var enemies_label: Label = $Interface/EnemiesLabel
 @onready var kills_label: Label = $Interface/KillsLabel
 @onready var health_bar: ProgressBar = $Interface/HealthBar
-@onready var game_over_panel: Panel = $Interface/GameOverPanel
-@onready var restart_button: Button = $Interface/GameOverPanel/RestartButton
 @onready var inventory_ui: InventoryUI = $InventoryUI
+@onready var game_over_ui: GameOverUI = $GameOverUI
+@onready var upgrade_shop: UpgradeShop = $UpgradeShop
 
 
 # ==========================================
@@ -29,8 +29,8 @@ var kills: int = 0
 # ==========================================
 
 func _ready() -> void:
-	restart_button.pressed.connect(_on_restart_button_pressed)
-	game_over_panel.visible = false
+	game_over_ui.restart_requested.connect(_on_restart_requested)
+	upgrade_shop.continue_requested.connect(_on_upgrade_shop_continue)
 	update_wave(0, 0)
 	update_enemies(0)
 	update_kills(0)
@@ -82,13 +82,33 @@ func register_kill() -> void:
 	update_kills(kills + 1)
 
 
-func show_game_over() -> void:
-	game_over_panel.visible = true
-	restart_button.grab_focus()
+func show_game_over(wave: int, total_kills: int) -> void:
+	inventory_ui.close_inventory()
+	upgrade_shop.visible = false
+	game_over_ui.show_game_over(wave, total_kills)
 
 
-func _on_restart_button_pressed() -> void:
+func show_upgrade_shop(upgrades: UpgradeManager, health: HealthComponent) -> void:
+	if game_over_ui.visible:
+		return
+	inventory_ui.close_inventory()
+	upgrade_shop.set_sources(upgrades, health)
+	upgrade_shop.show_shop()
+
+
+func close_upgrade_shop() -> void:
+	upgrade_shop.hide_shop()
+
+
+func _on_restart_requested() -> void:
 	restart_requested.emit()
+
+
+func _on_upgrade_shop_continue() -> void:
+	upgrade_shop.hide_shop()
+	var current_scene := get_tree().current_scene
+	if current_scene != null and current_scene.has_method("continue_after_upgrades"):
+		current_scene.continue_after_upgrades()
 
 
 func set_inventory(inventory: InventoryComponent) -> void:

@@ -15,28 +15,39 @@ var dano_efectivo: float
 var alcance_efectivo: float
 var costo_vida_efectivo: float
 var tiempo_recarga_efectivo: float
+var multiplicador_dano_mejoras: float = 1.0
+var multiplicador_alcance_mejoras: float = 1.0
+var estadisticas_arma: WeaponStats
 
 
 func _ready() -> void:
-	_recalcular_estadisticas(null)
+	_recalcular_estadisticas()
 
 
 func aplicar_estadisticas_arma(stats: WeaponStats) -> void:
-	_recalcular_estadisticas(stats)
+	estadisticas_arma = stats
+	_recalcular_estadisticas()
 
 
-func _recalcular_estadisticas(stats: WeaponStats) -> void:
-	if stats == null or not stats.is_valid():
-		dano_efectivo = dano
-		alcance_efectivo = alcance
+func aplicar_multiplicadores_mejoras(multiplicador_dano: float, multiplicador_alcance: float) -> void:
+	multiplicador_dano_mejoras = maxf(multiplicador_dano, 0.0)
+	multiplicador_alcance_mejoras = maxf(multiplicador_alcance, 0.0)
+	_recalcular_estadisticas()
+
+
+func _recalcular_estadisticas() -> void:
+	var dano_base := dano
+	var alcance_base := alcance
+	if estadisticas_arma != null and estadisticas_arma.is_valid():
+		dano_base = estadisticas_arma.damage
+		alcance_base = estadisticas_arma.attack_range
+		costo_vida_efectivo = estadisticas_arma.health_cost
+		tiempo_recarga_efectivo = estadisticas_arma.cooldown
+	else:
 		costo_vida_efectivo = costo_vida
 		tiempo_recarga_efectivo = tiempo_recarga
-		return
-
-	dano_efectivo = stats.damage
-	alcance_efectivo = stats.attack_range
-	costo_vida_efectivo = stats.health_cost
-	tiempo_recarga_efectivo = stats.cooldown
+	dano_efectivo = dano_base * multiplicador_dano_mejoras
+	alcance_efectivo = alcance_base * multiplicador_alcance_mejoras
 
 
 func _process(delta: float) -> void:

@@ -52,7 +52,7 @@ func _run() -> void:
 	_check(not inventory_ui.visible and not paused, "cerrar mediante X")
 
 	inventory_ui.open_inventory()
-	main_instance.game_state = 1
+	main_instance.get_node("GameManager").current_state = GameManager.GameState.GAME_OVER
 	inventory_ui.close_inventory()
 	_check(not inventory_ui.visible and paused, "no reanudar después de GAME_OVER")
 	paused = false

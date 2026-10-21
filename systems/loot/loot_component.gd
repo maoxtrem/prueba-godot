@@ -28,6 +28,10 @@ func generate_loot_at(death_position: Vector2, drop_parent: Node) -> Array[Node2
 
 	loot_processed = true
 	var generated_drops: Array[Node2D] = []
+	if is_inside_tree():
+		var current_scene := get_tree().current_scene
+		if current_scene != null and current_scene.has_method("is_game_over") and current_scene.is_game_over():
+			return generated_drops
 	if loot_table == null or drop_scene == null or not is_instance_valid(drop_parent):
 		return generated_drops
 

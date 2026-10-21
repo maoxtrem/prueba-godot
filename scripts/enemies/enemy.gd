@@ -74,7 +74,9 @@ func actualizar_barra(actual: float, maxima: float) -> void:
 func morir() -> void:
 	velocity = Vector2.ZERO
 	set_physics_process(false)
-	recompensa.entregar_recompensa(jugador)
+	var current_scene := get_tree().current_scene
+	if current_scene == null or not current_scene.has_method("is_game_over") or not current_scene.is_game_over():
+		recompensa.entregar_recompensa(jugador)
 	enemy_died.emit(self)
 	queue_free()
 

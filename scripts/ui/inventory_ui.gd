@@ -78,9 +78,14 @@ func open_inventory() -> void:
 		return
 
 	was_paused_before_open = get_tree().paused
+	var game_manager := _get_game_manager()
+	if game_manager != null:
+		if not game_manager.pause_game():
+			return
+	else:
+		get_tree().paused = true
 	_refresh_inventory()
 	visible = true
-	get_tree().paused = true
 	if slot_buttons.size() > 0:
 		slot_buttons[0].grab_focus()
 
@@ -90,7 +95,10 @@ func close_inventory() -> void:
 		return
 
 	visible = false
-	if not _is_game_over():
+	var game_manager := _get_game_manager()
+	if game_manager != null:
+		game_manager.resume_game()
+	elif not _is_game_over():
 		get_tree().paused = was_paused_before_open
 
 
@@ -254,3 +262,11 @@ func _is_game_over() -> bool:
 		and current_scene.has_method("is_game_over")
 		and current_scene.is_game_over()
 	)
+
+
+func _get_game_manager() -> GameManager:
+	var current_scene := get_tree().current_scene
+	if current_scene == null:
+		return null
+
+	return current_scene.get_node_or_null("GameManager") as GameManager

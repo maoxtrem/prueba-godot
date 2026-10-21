@@ -5,6 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://clauaipkaf6j8" path="res://scenes/ui/hud.tscn" id="2_tbgi4"]
 [ext_resource type="PackedScene" uid="uid://cot48h2dhdu87" path="res://scenes/enemies/enemy.tscn" id="3_tbgi4"]
 [ext_resource type="Script" uid="uid://b2nxk6x1ab3vd" path="res://systems/waves/wave_manager.gd" id="4_tbgi4"]
+[ext_resource type="Script" path="res://systems/game/game_manager.gd" id="5_game_manager"]
 
 [node name="Main" type="Node2D" unique_id=1429946689]
 script = ExtResource("1_jyhfs")
@@ -17,6 +18,9 @@ position = Vector2(133, 172)
 [node name="EnemyContainer" type="Node2D" parent="." unique_id=1464997685]
 
 [node name="ItemDropContainer" type="Node2D" parent="." unique_id=1464997686]
+
+[node name="GameManager" type="Node" parent="."]
+script = ExtResource("5_game_manager")
 
 [node name="WaveManager" type="Node" parent="." unique_id=3992274]
 script = ExtResource("4_tbgi4")

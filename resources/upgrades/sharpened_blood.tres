@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="UpgradeData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://systems/upgrades/upgrade_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "sharpened_blood"
+display_name = "Sangre afilada"
+description = "+25% de daño por nivel."
+health_cost = 15.0
+effect_type = 2
+effect_value = 0.25
+max_level = 3

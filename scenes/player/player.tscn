@@ -8,6 +8,12 @@
 [ext_resource type="Script" path="res://systems/inventory/inventory_component.gd" id="6_inventory"]
 [ext_resource type="Script" path="res://components/pickup/pickup_component.gd" id="7_pickup"]
 [ext_resource type="Script" path="res://components/equipment/equipment_component.gd" id="8_equipment"]
+[ext_resource type="Script" path="res://systems/upgrades/upgrade_manager.gd" id="9_upgrades"]
+[ext_resource type="Resource" path="res://resources/upgrades/light_legs.tres" id="10_light"]
+[ext_resource type="Resource" path="res://resources/upgrades/efficient_step.tres" id="11_step"]
+[ext_resource type="Resource" path="res://resources/upgrades/sharpened_blood.tres" id="12_blood"]
+[ext_resource type="Resource" path="res://resources/upgrades/hunter_vision.tres" id="13_vision"]
+[ext_resource type="Script" path="res://systems/upgrades/upgrade_data.gd" id="14_upgrade_data"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_en5gj"]
 radius = 45.0
@@ -51,6 +57,10 @@ capacity = 20
 script = ExtResource("8_equipment")
 inventory_path = NodePath("../InventoryComponent")
 health_path = NodePath("../HealthComponent")
+
+[node name="UpgradeManager" type="Node" parent="."]
+script = ExtResource("9_upgrades")
+available_upgrades = Array[ExtResource("14_upgrade_data")]([ExtResource("10_light"), ExtResource("11_step"), ExtResource("12_blood"), ExtResource("13_vision")])
 
 [node name="PickupComponent" type="Area2D" parent="." node_paths=PackedStringArray("inventory_path", "health_path")]
 collision_layer = 0

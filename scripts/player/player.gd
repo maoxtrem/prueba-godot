@@ -9,8 +9,10 @@ extends CharacterBody2D
 @onready var costo_movimiento: MovementCostComponent = $MovementCostComponent
 @onready var componente_ataque: AttackComponent = $AttackComponent
 @onready var equipamiento: EquipmentComponent = $EquipmentComponent
+var velocidad_efectiva: float
 
 func _ready() -> void:
+	velocidad_efectiva = velocidad
 	health.health_changed.connect(actualizar_barra_vida)
 	health.died.connect(morir)
 	equipamiento.equipment_changed.connect(_on_equipment_changed)
@@ -34,7 +36,7 @@ func _physics_process(_delta: float) -> void:
         "ui_down"
 	)
 
-	velocity = direccion * velocidad
+	velocity = direccion * velocidad_efectiva
 
 	var posicion_anterior := global_position
 	move_and_slide()
@@ -59,6 +61,10 @@ func _input(event: InputEvent) -> void:
 
 func atacar() -> void:
 	componente_ataque.atacar(self, &"enemigos")
+
+
+func aplicar_velocidad_efectiva(valor: float) -> void:
+	velocidad_efectiva = maxf(valor, 0.0)
 
 
 func recibir_dano(cantidad: float) -> void:

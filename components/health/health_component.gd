@@ -15,6 +15,12 @@ func _ready() -> void:
 	health_changed.emit(current_health, max_health)
 
 
+func reset_health() -> void:
+	current_health = max_health
+	is_dead = false
+	health_changed.emit(current_health, max_health)
+
+
 func take_damage(amount: float) -> void:
 	if is_dead or amount <= 0.0:
 		return
