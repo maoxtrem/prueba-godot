@@ -62,6 +62,7 @@ func _run() -> void:
 	var ranged := WeaponStats.new()
 	var ranged_cost := WeaponCostConfig.new()
 	ranged.combat_type = WeaponStats.CombatType.RANGED
+	ranged.projectile_speed = 100.0
 	ranged.cost_config = ranged_cost
 	ranged_cost.uses_ammo = true
 	ranged_cost.ammo_item_id = "crossbow_bolt"

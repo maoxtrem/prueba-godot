@@ -78,7 +78,7 @@ func _run() -> void:
 	var second_shop: UpgradeShop = second_main.get_node("HUD/UpgradeShop")
 	_check(second_shop.visible, "abrir tienda para probar botón Cerrar")
 	second_shop.close_button.emit_signal("pressed")
-	_check(not second_shop.visible and not paused, "cerrar mediante botón Cerrar")
+	_check(not second_shop.visible and not paused, "cerrar mediante señal del botón Cerrar")
 
 	print("Upgrade shop tests: ", checks, " comprobaciones correctas")
 	quit()

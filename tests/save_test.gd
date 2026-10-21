@@ -5,6 +5,7 @@ const SWORD := preload("res://resources/items/test_weapon.tres")
 const ARMOR := preload("res://resources/items/reinforced_cloth.tres")
 const MATERIAL := preload("res://resources/items/test_material.tres")
 const AMMO := preload("res://resources/items/crossbow_bolt.tres")
+const CROSSBOW := preload("res://resources/items/weapon_crossbow.tres")
 const FURY := preload("res://resources/consumables/fury_elixir.tres")
 
 func _init() -> void:
@@ -37,6 +38,7 @@ func _run() -> void:
 	_check(equipment.equip_item("rusty_sword", slots[0].weapon_instance.instance_id).success, "preparar arma equipada")
 	_check(equipment.equip_item("reinforced_cloth").success, "preparar armadura equipada")
 	inventory.add_item(AMMO, 10)
+	inventory.add_item(CROSSBOW, 1)
 	upgrades.upgrade_levels["light_legs"] = 1
 	quests.register_enemy_kill(5)
 	effects.apply_effect(FURY)
@@ -61,7 +63,7 @@ func _run() -> void:
 		quit()
 		return
 	var loaded_game: Dictionary = loaded.data.game
-	_check(loaded_game.inventory.slots.size() == 3 and loaded_game.inventory.slots[0].weapon_instance.upgrade_level == 2 and loaded_game.inventory.slots[2].item_id == "crossbow_bolt" and loaded_game.inventory.slots[2].quantity == 10, "conservar inventario, nivel y munición")
+	_check(loaded_game.inventory.slots.size() == 4 and loaded_game.inventory.slots[0].weapon_instance.upgrade_level == 2 and loaded_game.inventory.slots[2].item_id == "crossbow_bolt" and loaded_game.inventory.slots[2].quantity == 10 and loaded_game.inventory.slots[3].item_id == "weapon_crossbow", "conservar inventario, arma ranged, nivel y munición")
 	_check(loaded_game.equipment.weapon.instance_id == slots[0].weapon_instance.instance_id and loaded_game.equipment.armor_item_id == "reinforced_cloth", "conservar equipo")
 	_check(is_equal_approx(float(loaded_game.equipment.weapon.current_durability), 37.0), "serializar durabilidad equipada")
 	_check(int(loaded_game.upgrades.light_legs) == 1, "conservar mejoras del personaje")
@@ -80,6 +82,7 @@ func _run() -> void:
 	_check(restored_main.player.health.current_health == main_instance.player.health.current_health, "restaurar vida sin consumirla")
 	_check(restored_main.inventory.get_item_quantity("test_material") == inventory.get_item_quantity("test_material"), "restaurar cantidades del inventario")
 	_check(restored_main.inventory.get_item_quantity("crossbow_bolt") == 10, "restaurar munición")
+	_check(restored_main.inventory.get_item_quantity("weapon_crossbow") == 1, "restaurar arma ranged")
 	var restored_weapon: WeaponInstance = restored_main.equipment.get_equipped_weapon_instance()
 	_check(restored_weapon != null and restored_weapon.instance_id == slots[0].weapon_instance.instance_id, "restaurar arma equipada")
 	_check(restored_weapon != null and is_equal_approx(restored_weapon.current_durability, 37.0), "restaurar durabilidad equipada")

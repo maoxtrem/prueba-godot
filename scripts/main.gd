@@ -49,6 +49,9 @@ func _ready() -> void:
 	hud.set_weapon_repairs(weapon_repairs)
 	hud.set_ammo_manager(ammo_manager)
 	hud.set_quest_manager(quest_manager)
+	# El panel visual solo solicita el cierre; Main mantiene la autoridad sobre
+	# el modal y la transición de GameManager. Esto unifica clic y tecla B.
+	hud.upgrade_shop.close_requested.connect(_on_upgrade_shop_close_requested)
 
 	# Conectar eventos de las oleadas
 	wave_manager.wave_started.connect(
@@ -365,5 +368,15 @@ func open_upgrade_shop() -> bool:
 
 
 func close_upgrade_shop() -> bool:
+	if not hud.upgrade_shop.visible:
+		return false
+	if game_manager.current_state != GameManager.GameState.UPGRADE_SELECTION:
+		return false
+	if not game_manager.continue_after_upgrades():
+		return false
 	hud.close_upgrade_shop()
-	return game_manager.continue_after_upgrades()
+	return true
+
+
+func _on_upgrade_shop_close_requested() -> void:
+	close_upgrade_shop()

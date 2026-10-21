@@ -36,6 +36,7 @@ func _physics_process(delta: float) -> void:
 	var space := get_world_2d().direct_space_state
 	var query := PhysicsRayQueryParameters2D.create(global_position, global_position + step)
 	query.collision_mask = 2
+	query.collide_with_areas = true
 	query.exclude = [self, attacker]
 	var hit := space.intersect_ray(query)
 	if not hit.is_empty():

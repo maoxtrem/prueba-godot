@@ -62,7 +62,6 @@ func show_shop() -> void:
 		return
 	_refresh()
 	visible = true
-	close_button.grab_focus()
 
 func hide_shop() -> void:
 	visible = false
@@ -139,6 +138,3 @@ func _reason_text(reason: String) -> String:
 
 func _on_close_pressed() -> void:
 	close_requested.emit()
-	var current_scene := get_tree().current_scene
-	if current_scene != null and current_scene.has_method("close_upgrade_shop"):
-		current_scene.close_upgrade_shop()
