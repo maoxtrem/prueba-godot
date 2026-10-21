@@ -8,10 +8,13 @@ extends CharacterBody2D
 @onready var barra_vida: ProgressBar = $LifeBars
 @onready var costo_movimiento: MovementCostComponent = $MovementCostComponent
 @onready var componente_ataque: AttackComponent = $AttackComponent
+@onready var equipamiento: EquipmentComponent = $EquipmentComponent
 
 func _ready() -> void:
 	health.health_changed.connect(actualizar_barra_vida)
 	health.died.connect(morir)
+	equipamiento.equipment_changed.connect(_on_equipment_changed)
+	componente_ataque.aplicar_estadisticas_arma(null)
 
 	actualizar_barra_vida(
 		health.current_health,
@@ -77,3 +80,14 @@ func actualizar_barra_vida(
 func morir() -> void:
 	velocity = Vector2.ZERO
 	print("El jugador ha muerto")
+
+
+func _on_equipment_changed(
+	_slot: EquipmentComponent.EquipmentSlot,
+	item: ItemData
+) -> void:
+	var stats: WeaponStats = null
+	if item != null and item.weapon_stats != null:
+		stats = item.weapon_stats
+
+	componente_ataque.aplicar_estadisticas_arma(stats)

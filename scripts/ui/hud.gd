@@ -14,6 +14,7 @@ signal restart_requested
 @onready var health_bar: ProgressBar = $Interface/HealthBar
 @onready var game_over_panel: Panel = $Interface/GameOverPanel
 @onready var restart_button: Button = $Interface/GameOverPanel/RestartButton
+@onready var inventory_ui: InventoryUI = $InventoryUI
 
 
 # ==========================================
@@ -88,3 +89,11 @@ func show_game_over() -> void:
 
 func _on_restart_button_pressed() -> void:
 	restart_requested.emit()
+
+
+func set_inventory(inventory: InventoryComponent) -> void:
+	inventory_ui.set_inventory(inventory)
+
+
+func set_equipment(equipment: EquipmentComponent) -> void:
+	inventory_ui.set_equipment(equipment)

@@ -6,6 +6,9 @@
 [ext_resource type="Script" uid="uid://dhjgym7hwahvp" path="res://components/regeneration/regeneration_component.gd" id="4_iifgy"]
 [ext_resource type="Script" uid="uid://dg1lh1knahceb" path="res://components/rewards/reward_component.gd" id="5_epg4t"]
 [ext_resource type="Script" uid="uid://c8qp55jjnftol" path="res://components/combat/attack_component.gd" id="6_3yqyl"]
+[ext_resource type="Script" path="res://systems/loot/loot_component.gd" id="7_loot_component"]
+[ext_resource type="PackedScene" path="res://scenes/items/item_drop.tscn" id="8_item_drop"]
+[ext_resource type="Resource" path="res://resources/loot/basic_enemy_loot.tres" id="9_enemy_loot"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_4gyqm"]
 radius = 45.0
@@ -47,3 +50,9 @@ alcance = 90.0
 costo_vida = 0.0
 tiempo_recarga = 1.0
 health = NodePath("../HealthComponent")
+
+[node name="LootComponent" type="Node" parent="." node_paths=PackedStringArray("drop_parent_path")]
+script = ExtResource("7_loot_component")
+loot_table = ExtResource("9_enemy_loot")
+drop_scene = ExtResource("8_item_drop")
+drop_parent_path = NodePath("../../../ItemDropContainer")

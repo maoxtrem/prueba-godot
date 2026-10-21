@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_drop.gd" id="1_item_drop"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_item_drop"]
+radius = 18.0
+
+[node name="ItemDrop" type="Area2D" groups=["item_drops"]]
+collision_layer = 8
+collision_mask = 0
+monitoring = true
+script = ExtResource("1_item_drop")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_item_drop")

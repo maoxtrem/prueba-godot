@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://clauaipkaf6j8"]
 
 [ext_resource type="Script" uid="uid://dvvemrbkjnewe" path="res://scripts/ui/hud.gd" id="1_0mwgc"]
+[ext_resource type="PackedScene" path="res://scenes/ui/inventory_ui.tscn" id="2_inventory_ui"]
 
 [node name="HUD" type="CanvasLayer" unique_id=1296587215]
 script = ExtResource("1_0mwgc")
@@ -81,3 +82,5 @@ offset_top = 135.0
 offset_right = 250.0
 offset_bottom = 175.0
 text = "Reiniciar"
+
+[node name="InventoryUI" parent="." instance=ExtResource("2_inventory_ui")]

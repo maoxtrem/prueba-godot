@@ -5,9 +5,15 @@
 [ext_resource type="Script" uid="uid://o5aisrhj1qu2" path="res://components/health/health_component.gd" id="3_i3pqv"]
 [ext_resource type="Script" uid="uid://gsi2bltd80jl" path="res://components/movement/movement_cost_component.gd" id="4_hqtel"]
 [ext_resource type="Script" uid="uid://c8qp55jjnftol" path="res://components/combat/attack_component.gd" id="5_sweqy"]
+[ext_resource type="Script" path="res://systems/inventory/inventory_component.gd" id="6_inventory"]
+[ext_resource type="Script" path="res://components/pickup/pickup_component.gd" id="7_pickup"]
+[ext_resource type="Script" path="res://components/equipment/equipment_component.gd" id="8_equipment"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_en5gj"]
 radius = 45.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_pickup"]
+radius = 100.0
 
 [node name="Player" type="CharacterBody2D" unique_id=1572066906 groups=["jugadores"]]
 collision_mask = 4
@@ -36,3 +42,33 @@ health = NodePath("../HealthComponent")
 [node name="AttackComponent" type="Node2D" parent="." unique_id=977715277 node_paths=PackedStringArray("health")]
 script = ExtResource("5_sweqy")
 health = NodePath("../HealthComponent")
+
+[node name="InventoryComponent" type="Node" parent="."]
+script = ExtResource("6_inventory")
+capacity = 20
+
+[node name="EquipmentComponent" type="Node" parent="." node_paths=PackedStringArray("inventory_path", "health_path")]
+script = ExtResource("8_equipment")
+inventory_path = NodePath("../InventoryComponent")
+health_path = NodePath("../HealthComponent")
+
+[node name="PickupComponent" type="Area2D" parent="." node_paths=PackedStringArray("inventory_path", "health_path")]
+collision_layer = 0
+collision_mask = 8
+monitoring = true
+script = ExtResource("7_pickup")
+inventory_path = NodePath("../InventoryComponent")
+health_path = NodePath("../HealthComponent")
+pickup_range = 100.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PickupComponent"]
+shape = SubResource("CircleShape2D_pickup")
+
+[node name="PickupPrompt" type="Label" parent="PickupComponent"]
+offset_left = -145.0
+offset_top = -125.0
+offset_right = 145.0
+offset_bottom = -95.0
+mouse_filter = 2
+horizontal_alignment = 1
+visible = false

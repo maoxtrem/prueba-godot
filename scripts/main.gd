@@ -16,6 +16,8 @@ var game_state: GameState = GameState.PLAYING
 @onready var player = $Player
 @onready var wave_manager: WaveManager = $WaveManager
 @onready var hud: GameHUD = $HUD
+@onready var inventory: InventoryComponent = $Player/InventoryComponent
+@onready var equipment: EquipmentComponent = $Player/EquipmentComponent
 
 
 # ==========================================
@@ -25,6 +27,8 @@ var game_state: GameState = GameState.PLAYING
 func _ready() -> void:
 	player.health.died.connect(_on_player_died)
 	hud.restart_requested.connect(_on_restart_requested)
+	hud.set_inventory(inventory)
+	hud.set_equipment(equipment)
 
 	# Conectar eventos de las oleadas
 	wave_manager.wave_started.connect(
@@ -85,3 +89,7 @@ func _on_restart_requested() -> void:
 
 	game_state = GameState.RESTART
 	get_tree().reload_current_scene()
+
+
+func is_game_over() -> bool:
+	return game_state == GameState.GAME_OVER

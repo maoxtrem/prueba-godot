@@ -16,6 +16,8 @@ position = Vector2(133, 172)
 
 [node name="EnemyContainer" type="Node2D" parent="." unique_id=1464997685]
 
+[node name="ItemDropContainer" type="Node2D" parent="." unique_id=1464997686]
+
 [node name="WaveManager" type="Node" parent="." unique_id=3992274]
 script = ExtResource("4_tbgi4")
 enemy_scene = ExtResource("3_tbgi4")
