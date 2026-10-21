@@ -9,6 +9,8 @@
 [ext_resource type="Script" path="res://components/pickup/pickup_component.gd" id="7_pickup"]
 [ext_resource type="Script" path="res://components/equipment/equipment_component.gd" id="8_equipment"]
 [ext_resource type="Script" path="res://systems/upgrades/upgrade_manager.gd" id="9_upgrades"]
+[ext_resource type="Script" path="res://systems/consumables/status_effect_component.gd" id="15_status"]
+[ext_resource type="Script" path="res://systems/consumables/consumable_component.gd" id="16_consumable"]
 [ext_resource type="Resource" path="res://resources/upgrades/light_legs.tres" id="10_light"]
 [ext_resource type="Resource" path="res://resources/upgrades/efficient_step.tres" id="11_step"]
 [ext_resource type="Resource" path="res://resources/upgrades/sharpened_blood.tres" id="12_blood"]
@@ -61,6 +63,17 @@ health_path = NodePath("../HealthComponent")
 [node name="UpgradeManager" type="Node" parent="."]
 script = ExtResource("9_upgrades")
 available_upgrades = Array[ExtResource("14_upgrade_data")]([ExtResource("10_light"), ExtResource("11_step"), ExtResource("12_blood"), ExtResource("13_vision")])
+
+[node name="StatusEffectComponent" type="Node" parent="." node_paths=PackedStringArray("attack_path", "movement_path")]
+script = ExtResource("15_status")
+attack_path = NodePath("../AttackComponent")
+movement_path = NodePath("../MovementCostComponent")
+
+[node name="ConsumableComponent" type="Node" parent="." node_paths=PackedStringArray("inventory_path", "health_path", "status_effect_path")]
+script = ExtResource("16_consumable")
+inventory_path = NodePath("../InventoryComponent")
+health_path = NodePath("../HealthComponent")
+status_effect_path = NodePath("../StatusEffectComponent")
 
 [node name="PickupComponent" type="Area2D" parent="." node_paths=PackedStringArray("inventory_path", "health_path")]
 collision_layer = 0

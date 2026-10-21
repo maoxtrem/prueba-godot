@@ -10,14 +10,22 @@ class_name InventoryUI
 @onready var weapon_name: Label = $InventoryWindow/Margin/VBox/EquipmentPanel/EquipmentMargin/EquipmentRow/WeaponName
 @onready var equip_button: Button = $InventoryWindow/Margin/VBox/EquipmentPanel/EquipmentMargin/EquipmentRow/EquipButton
 @onready var unequip_button: Button = $InventoryWindow/Margin/VBox/EquipmentPanel/EquipmentMargin/EquipmentRow/UnequipButton
+@onready var armor_icon: TextureRect = $InventoryWindow/Margin/VBox/EquipmentPanel/EquipmentMargin/ArmorRow/ArmorIcon
+@onready var armor_marker: Label = $InventoryWindow/Margin/VBox/EquipmentPanel/EquipmentMargin/ArmorRow/ArmorMarker
+@onready var armor_name: Label = $InventoryWindow/Margin/VBox/EquipmentPanel/EquipmentMargin/ArmorRow/ArmorName
+@onready var equip_armor_button: Button = $InventoryWindow/Margin/VBox/EquipmentPanel/EquipmentMargin/ArmorRow/EquipArmorButton
+@onready var unequip_armor_button: Button = $InventoryWindow/Margin/VBox/EquipmentPanel/EquipmentMargin/ArmorRow/UnequipArmorButton
 @onready var selected_name: Label = $InventoryWindow/Margin/VBox/Description/DescriptionMargin/DescriptionVBox/Name
 @onready var selected_description: Label = $InventoryWindow/Margin/VBox/Description/DescriptionMargin/DescriptionVBox/Details
+@onready var use_button: Button = $InventoryWindow/Margin/VBox/Description/DescriptionMargin/DescriptionVBox/UseButton
+@onready var use_message: Label = $InventoryWindow/Margin/VBox/Description/DescriptionMargin/DescriptionVBox/UseMessage
 
 const SLOT_SCENE: PackedScene = preload("res://scenes/ui/inventory_slot_ui.tscn")
 const SLOT_COUNT: int = 20
 
 var inventory: InventoryComponent
 var equipment: EquipmentComponent
+var consumables: ConsumableComponent
 var slot_buttons: Array[InventorySlotUI] = []
 var visible_slots: Array[InventorySlot] = []
 var selected_index: int = -1
@@ -30,6 +38,9 @@ func _ready() -> void:
 	close_button.pressed.connect(close_inventory)
 	equip_button.pressed.connect(_on_equip_pressed)
 	unequip_button.pressed.connect(_on_unequip_pressed)
+	equip_armor_button.pressed.connect(_on_equip_armor_pressed)
+	unequip_armor_button.pressed.connect(_on_unequip_armor_pressed)
+	use_button.pressed.connect(_on_use_pressed)
 	visible = false
 
 	for index in range(SLOT_COUNT):
@@ -63,6 +74,17 @@ func set_equipment(target_equipment: EquipmentComponent) -> void:
 		equipment.equipment_changed.connect(_on_equipment_changed)
 
 	_update_equipment_visual()
+
+func set_consumables(target_consumables: ConsumableComponent) -> void:
+	if consumables != null and consumables.consumable_used.is_connected(_on_consumable_used):
+		consumables.consumable_used.disconnect(_on_consumable_used)
+	if consumables != null and consumables.consumable_use_failed.is_connected(_on_consumable_failed):
+		consumables.consumable_use_failed.disconnect(_on_consumable_failed)
+	consumables = target_consumables
+	if consumables != null:
+		consumables.consumable_used.connect(_on_consumable_used)
+		consumables.consumable_use_failed.connect(_on_consumable_failed)
+	_update_equipment_buttons()
 
 
 func _input(event: InputEvent) -> void:
@@ -133,6 +155,7 @@ func _refresh_inventory() -> void:
 		_clear_description()
 	else:
 		_show_description(visible_slots[selected_index])
+	_update_equipment_buttons()
 
 
 func _on_slot_selected(slot_ui: InventorySlotUI) -> void:
@@ -158,11 +181,16 @@ func _show_description(slot: InventorySlot) -> void:
 		_rarity_name(slot.item.rarity),
 		_weapon_stats_text(slot.item),
 	]
+	if slot.item.consumable_data != null:
+		selected_description.text += "\nEfecto configurable de consumible"
+	if slot.item.armor_stats != null:
+		selected_description.text += "\n%s" % _armor_stats_text(slot.item)
 
 
 func _clear_description() -> void:
 	selected_name.text = "Selecciona un objeto"
 	selected_description.text = "Aquí aparecerán sus detalles."
+	use_message.text = ""
 	_update_equipment_buttons()
 
 
@@ -191,6 +219,46 @@ func _on_unequip_pressed() -> void:
 		_clear_description()
 		_refresh_inventory()
 
+func _on_equip_armor_pressed() -> void:
+	if equipment == null or selected_index < 0 or selected_index >= visible_slots.size():
+		return
+	var slot := visible_slots[selected_index]
+	if slot == null or slot.item == null:
+		return
+	var result := equipment.equip_item(slot.item.id)
+	if result.get("success", false):
+		selected_index = -1
+		_clear_description()
+		_refresh_inventory()
+
+func _on_unequip_armor_pressed() -> void:
+	if equipment == null:
+		return
+	var result := equipment.unequip_armor()
+	if result.get("success", false):
+		selected_index = -1
+		_clear_description()
+		_refresh_inventory()
+
+func _on_use_pressed() -> void:
+	if consumables == null or selected_index < 0 or selected_index >= visible_slots.size():
+		return
+	var slot := visible_slots[selected_index]
+	if slot == null or slot.item == null:
+		return
+	var result := consumables.use_item(slot.item.id)
+	if result.get("success", false):
+		use_message.text = "Consumible usado."
+	else:
+		use_message.text = "No se puede usar: %s" % _reason_text(result.get("reason", "error"))
+	_refresh_inventory()
+
+func _on_consumable_used(_item: ItemData, _data: ConsumableData) -> void:
+	use_message.text = "Consumible usado."
+
+func _on_consumable_failed(_item_id: String, reason: String) -> void:
+	use_message.text = "No se puede usar: %s" % _reason_text(reason)
+
 
 func _update_equipment_visual() -> void:
 	if equipment == null:
@@ -216,6 +284,19 @@ func _update_equipment_visual() -> void:
 			equipped.display_name,
 			_weapon_stats_text(equipped),
 		]
+	var armor := equipment.get_equipped_item(EquipmentComponent.EquipmentSlot.ARMOR)
+	if armor == null:
+		armor_icon.texture = null
+		armor_icon.visible = false
+		armor_marker.visible = true
+		armor_marker.text = "◇"
+		armor_name.text = "Armadura: ninguna"
+	else:
+		armor_icon.texture = armor.icon
+		armor_icon.visible = armor.icon != null
+		armor_marker.visible = armor.icon == null
+		armor_marker.text = "◇"
+		armor_name.text = "Armadura: %s\n%s" % [armor.display_name, _armor_stats_text(armor)]
 
 	_update_equipment_buttons()
 
@@ -230,6 +311,17 @@ func _update_equipment_buttons() -> void:
 	)
 	equip_button.disabled = equipment == null or not selected_is_weapon
 	unequip_button.disabled = equipment == null or equipment.get_equipped_item(EquipmentComponent.EquipmentSlot.WEAPON) == null
+	var selected_is_consumable := selected_index >= 0 and selected_index < visible_slots.size() and visible_slots[selected_index] != null and visible_slots[selected_index].item != null and visible_slots[selected_index].item.item_type == ItemData.ItemType.CONSUMABLE
+	use_button.disabled = consumables == null or not selected_is_consumable
+	if not use_button.disabled:
+		use_button.disabled = not consumables.can_use_item(visible_slots[selected_index].item.id).get("success", false)
+	var selected_is_armor := selected_index >= 0 and selected_index < visible_slots.size() and visible_slots[selected_index] != null and visible_slots[selected_index].item != null and visible_slots[selected_index].item.item_type == ItemData.ItemType.ARMOR
+	equip_armor_button.disabled = equipment == null or not selected_is_armor
+	unequip_armor_button.disabled = equipment == null or equipment.get_equipped_item(EquipmentComponent.EquipmentSlot.ARMOR) == null
+
+func _reason_text(reason: String) -> String:
+	var labels := {"health_full": "vida al máximo", "player_dead": "jugador muerto", "game_over": "partida terminada", "not_in_inventory": "no está en el inventario"}
+	return labels.get(reason, reason)
 
 
 func _item_type_name(item_type: ItemData.ItemType) -> String:
@@ -253,6 +345,16 @@ func _weapon_stats_text(item: ItemData) -> String:
 		stats.health_cost,
 		stats.attack_range,
 		stats.cooldown,
+	]
+
+func _armor_stats_text(item: ItemData) -> String:
+	if item == null or item.armor_stats == null:
+		return "Defensa: base"
+	var stats := item.armor_stats
+	return "Defensa: %.0f%% | Velocidad: %+.0f%% | Costo movimiento: %+.0f%%" % [
+		stats.damage_reduction * 100.0,
+		stats.movement_speed_modifier * 100.0,
+		stats.movement_cost_modifier * 100.0,
 	]
 
 

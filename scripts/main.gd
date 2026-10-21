@@ -13,6 +13,7 @@ extends Node2D
 @onready var inventory: InventoryComponent = $Player/InventoryComponent
 @onready var equipment: EquipmentComponent = $Player/EquipmentComponent
 @onready var upgrades: UpgradeManager = $Player/UpgradeManager
+@onready var consumables: ConsumableComponent = $Player/ConsumableComponent
 @onready var game_manager: GameManager = $GameManager
 
 
@@ -28,6 +29,7 @@ func _ready() -> void:
 	hud.restart_requested.connect(_on_restart_requested)
 	hud.set_inventory(inventory)
 	hud.set_equipment(equipment)
+	hud.set_consumables(consumables)
 	game_manager.start_game()
 
 	# Conectar eventos de las oleadas

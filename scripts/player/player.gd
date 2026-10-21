@@ -11,6 +11,7 @@ extends CharacterBody2D
 @onready var equipamiento: EquipmentComponent = $EquipmentComponent
 var velocidad_efectiva: float
 var debug_settings: DebugSettings
+var multiplicador_velocidad_mejoras: float = 1.0
 
 func _ready() -> void:
 	velocidad_efectiva = velocidad
@@ -65,7 +66,8 @@ func atacar() -> void:
 
 
 func aplicar_velocidad_efectiva(valor: float) -> void:
-	velocidad_efectiva = maxf(valor, 0.0)
+	multiplicador_velocidad_mejoras = maxf(valor / velocidad, 0.0) if velocidad > 0.0 else 0.0
+	_recalcular_velocidad()
 
 
 func configure_debug(settings: DebugSettings) -> void:
@@ -81,6 +83,7 @@ func recibir_dano_de_enemigo(cantidad: float) -> void:
 	var multiplicador := 1.0
 	if debug_settings != null:
 		multiplicador = debug_settings.get_enemy_damage_multiplier()
+	multiplicador *= equipamiento.get_enemy_damage_multiplier()
 	health.take_damage(cantidad * multiplicador)
 
 
@@ -109,4 +112,10 @@ func _on_equipment_changed(
 	if item != null and item.weapon_stats != null:
 		stats = item.weapon_stats
 
-	componente_ataque.aplicar_estadisticas_arma(stats)
+	if _slot == EquipmentComponent.EquipmentSlot.WEAPON:
+		componente_ataque.aplicar_estadisticas_arma(stats)
+	costo_movimiento.aplicar_multiplicador_armadura(equipamiento.get_armor_movement_cost_multiplier())
+	_recalcular_velocidad()
+
+func _recalcular_velocidad() -> void:
+	velocidad_efectiva = maxf(velocidad * multiplicador_velocidad_mejoras * equipamiento.get_armor_speed_multiplier(), 0.0)

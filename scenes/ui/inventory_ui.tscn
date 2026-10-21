@@ -64,7 +64,7 @@ theme_override_constants/h_separation = 8
 theme_override_constants/v_separation = 8
 
 [node name="EquipmentPanel" type="PanelContainer" parent="InventoryWindow/Margin/VBox"]
-custom_minimum_size = Vector2(0, 64)
+custom_minimum_size = Vector2(0, 128)
 layout_mode = 2
 
 [node name="EquipmentMargin" type="MarginContainer" parent="InventoryWindow/Margin/VBox/EquipmentPanel"]
@@ -107,6 +107,39 @@ text = "Equipar"
 layout_mode = 2
 text = "Desequipar"
 
+[node name="ArmorRow" type="HBoxContainer" parent="InventoryWindow/Margin/VBox/EquipmentPanel/EquipmentMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ArmorIcon" type="TextureRect" parent="InventoryWindow/Margin/VBox/EquipmentPanel/EquipmentMargin/ArmorRow"]
+custom_minimum_size = Vector2(42, 42)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ArmorMarker" type="Label" parent="InventoryWindow/Margin/VBox/EquipmentPanel/EquipmentMargin/ArmorRow"]
+custom_minimum_size = Vector2(42, 42)
+layout_mode = 2
+text = "◇"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ArmorName" type="Label" parent="InventoryWindow/Margin/VBox/EquipmentPanel/EquipmentMargin/ArmorRow"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+size_flags_horizontal = 3
+vertical_alignment = 1
+autowrap_mode = 2
+text = "Armadura: ninguna"
+
+[node name="EquipArmorButton" type="Button" parent="InventoryWindow/Margin/VBox/EquipmentPanel/EquipmentMargin/ArmorRow"]
+layout_mode = 2
+text = "Equipar"
+
+[node name="UnequipArmorButton" type="Button" parent="InventoryWindow/Margin/VBox/EquipmentPanel/EquipmentMargin/ArmorRow"]
+layout_mode = 2
+text = "Desequipar"
+
 [node name="Description" type="PanelContainer" parent="InventoryWindow/Margin/VBox"]
 custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
@@ -130,3 +163,11 @@ layout_mode = 2
 size_flags_vertical = 3
 text = "Aquí aparecerán sus detalles."
 autowrap_mode = 2
+
+[node name="UseButton" type="Button" parent="InventoryWindow/Margin/VBox/Description/DescriptionMargin/DescriptionVBox"]
+layout_mode = 2
+text = "Usar consumible"
+
+[node name="UseMessage" type="Label" parent="InventoryWindow/Margin/VBox/Description/DescriptionMargin/DescriptionVBox"]
+layout_mode = 2
+text = ""

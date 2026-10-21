@@ -109,3 +109,6 @@ func set_inventory(inventory: InventoryComponent) -> void:
 
 func set_equipment(equipment: EquipmentComponent) -> void:
 	inventory_ui.set_equipment(equipment)
+
+func set_consumables(consumables: ConsumableComponent) -> void:
+	inventory_ui.set_consumables(consumables)

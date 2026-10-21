@@ -17,6 +17,7 @@ var costo_vida_efectivo: float
 var tiempo_recarga_efectivo: float
 var multiplicador_dano_mejoras: float = 1.0
 var multiplicador_alcance_mejoras: float = 1.0
+var multiplicador_dano_consumible: float = 1.0
 var estadisticas_arma: WeaponStats
 
 
@@ -35,6 +36,11 @@ func aplicar_multiplicadores_mejoras(multiplicador_dano: float, multiplicador_al
 	_recalcular_estadisticas()
 
 
+func aplicar_multiplicador_consumible(multiplicador: float) -> void:
+	multiplicador_dano_consumible = maxf(multiplicador, 0.0)
+	_recalcular_estadisticas()
+
+
 func _recalcular_estadisticas() -> void:
 	var dano_base := dano
 	var alcance_base := alcance
@@ -46,7 +52,7 @@ func _recalcular_estadisticas() -> void:
 	else:
 		costo_vida_efectivo = costo_vida
 		tiempo_recarga_efectivo = tiempo_recarga
-	dano_efectivo = dano_base * multiplicador_dano_mejoras
+	dano_efectivo = dano_base * multiplicador_dano_mejoras * multiplicador_dano_consumible
 	alcance_efectivo = alcance_base * multiplicador_alcance_mejoras
 
 

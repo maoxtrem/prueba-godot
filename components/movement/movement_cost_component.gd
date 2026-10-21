@@ -10,6 +10,9 @@ class_name MovementCostComponent
 var distancia_total: float = 0.0
 var multiplicador_movimiento_base: float
 var multiplicador_movimiento_efectivo: float
+var multiplicador_mejoras: float = 1.0
+var multiplicador_consumible: float = 1.0
+var multiplicador_armadura: float = 1.0
 
 
 func _ready() -> void:
@@ -18,7 +21,21 @@ func _ready() -> void:
 
 
 func aplicar_multiplicador_efectivo(valor: float) -> void:
-	multiplicador_movimiento_efectivo = maxf(valor, 0.0)
+	multiplicador_mejoras = maxf(valor / multiplicador_movimiento_base, 0.0) if multiplicador_movimiento_base > 0.0 else 0.0
+	_recalcular_multiplicador()
+
+
+func aplicar_multiplicador_consumible(valor: float) -> void:
+	multiplicador_consumible = maxf(valor, 0.0)
+	_recalcular_multiplicador()
+
+func aplicar_multiplicador_armadura(valor: float) -> void:
+	multiplicador_armadura = maxf(valor, 0.0)
+	_recalcular_multiplicador()
+
+
+func _recalcular_multiplicador() -> void:
+	multiplicador_movimiento_efectivo = maxf(multiplicador_movimiento_base * multiplicador_mejoras * multiplicador_consumible * multiplicador_armadura, 0.0)
 
 
 func procesar_movimiento(distancia: float) -> void:

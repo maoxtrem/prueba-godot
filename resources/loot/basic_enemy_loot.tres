@@ -4,6 +4,13 @@
 [ext_resource type="Script" uid="uid://ogakgh3i0q6e" path="res://systems/loot/loot_entry.gd" id="2_loot_entry"]
 [ext_resource type="Resource" path="res://resources/items/test_material.tres" id="3_material"]
 [ext_resource type="Resource" uid="uid://ci2wahq6subwj" path="res://resources/items/test_weapon.tres" id="4_weapon"]
+[ext_resource type="Resource" path="res://resources/items/blood_potion.tres" id="5_potion"]
+[ext_resource type="Resource" path="res://resources/items/vital_essence.tres" id="6_essence"]
+[ext_resource type="Resource" path="res://resources/items/fury_elixir.tres" id="7_fury"]
+[ext_resource type="Resource" path="res://resources/items/endurance_serum.tres" id="8_endurance"]
+[ext_resource type="Resource" path="res://resources/items/reinforced_cloth.tres" id="9_cloth"]
+[ext_resource type="Resource" path="res://resources/items/iron_cuirass.tres" id="10_iron"]
+[ext_resource type="Resource" path="res://resources/items/crimson_armor.tres" id="11_crimson"]
 
 [sub_resource type="Resource" id="LootEntry_material"]
 script = ExtResource("2_loot_entry")
@@ -16,6 +23,41 @@ script = ExtResource("2_loot_entry")
 item = ExtResource("4_weapon")
 drop_chance = 0.05
 
+[sub_resource type="Resource" id="LootEntry_potion"]
+script = ExtResource("2_loot_entry")
+item = ExtResource("5_potion")
+drop_chance = 0.15
+
+[sub_resource type="Resource" id="LootEntry_essence"]
+script = ExtResource("2_loot_entry")
+item = ExtResource("6_essence")
+drop_chance = 0.05
+
+[sub_resource type="Resource" id="LootEntry_fury"]
+script = ExtResource("2_loot_entry")
+item = ExtResource("7_fury")
+drop_chance = 0.03
+
+[sub_resource type="Resource" id="LootEntry_endurance"]
+script = ExtResource("2_loot_entry")
+item = ExtResource("8_endurance")
+drop_chance = 0.03
+
+[sub_resource type="Resource" id="LootEntry_cloth"]
+script = ExtResource("2_loot_entry")
+item = ExtResource("9_cloth")
+drop_chance = 0.08
+
+[sub_resource type="Resource" id="LootEntry_iron"]
+script = ExtResource("2_loot_entry")
+item = ExtResource("10_iron")
+drop_chance = 0.03
+
+[sub_resource type="Resource" id="LootEntry_crimson"]
+script = ExtResource("2_loot_entry")
+item = ExtResource("11_crimson")
+drop_chance = 0.01
+
 [resource]
 script = ExtResource("1_loot_table")
-entries = Array[ExtResource("2_loot_entry")]([SubResource("LootEntry_material"), SubResource("LootEntry_weapon")])
+entries = Array[ExtResource("2_loot_entry")]([SubResource("LootEntry_material"), SubResource("LootEntry_weapon"), SubResource("LootEntry_potion"), SubResource("LootEntry_essence"), SubResource("LootEntry_fury"), SubResource("LootEntry_endurance"), SubResource("LootEntry_cloth"), SubResource("LootEntry_iron"), SubResource("LootEntry_crimson")])

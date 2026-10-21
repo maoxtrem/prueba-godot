@@ -25,3 +25,5 @@ enum Rarity {
 @export var rarity: Rarity = Rarity.COMMON
 @export_range(1, 999999, 1) var max_stack: int = 1
 @export var weapon_stats: WeaponStats
+@export var consumable_data: ConsumableData
+@export var armor_stats: ArmorStats

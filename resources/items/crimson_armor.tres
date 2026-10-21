@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]
+[ext_resource type="Script" path="res://systems/inventory/item_data.gd" id="1_item"]
+[ext_resource type="Script" path="res://systems/equipment/armor_stats.gd" id="2_armor"]
+[sub_resource type="Resource" id="ArmorStats_crimson"]
+script = ExtResource("2_armor")
+damage_reduction = 0.4
+movement_cost_modifier = 0.2
+[resource]
+script = ExtResource("1_item")
+id = "crimson_armor"
+display_name = "Armadura carmesí"
+description = "Protección excepcional a cambio de mayor costo de movimiento."
+item_type = 1
+max_stack = 1
+armor_stats = SubResource("ArmorStats_crimson")

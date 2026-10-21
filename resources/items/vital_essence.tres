@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]
+[ext_resource type="Script" path="res://systems/inventory/item_data.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/consumables/vital_essence.tres" id="2"]
+[resource]
+script = ExtResource("1")
+id = "vital_essence"
+display_name = "Esencia vital"
+description = "Restaura 50 HP."
+item_type = 2
+max_stack = 10
+consumable_data = ExtResource("2")
