@@ -130,6 +130,19 @@ func get_available_space(item: ItemData) -> int:
 func get_slots() -> Array[InventorySlot]:
 	return slots.duplicate()
 
+func clear_items() -> void:
+	slots.clear()
+	_emit_inventory_changed()
+
+func replace_slots(restored_slots: Array[InventorySlot], restored_capacity: int = -1) -> bool:
+	if restored_capacity > 0:
+		capacity = restored_capacity
+	if restored_slots.size() > capacity:
+		return false
+	slots = restored_slots.duplicate()
+	_emit_inventory_changed()
+	return true
+
 
 func _is_valid_item(item: ItemData) -> bool:
 	return (

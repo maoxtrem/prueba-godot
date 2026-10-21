@@ -6,3 +6,9 @@ func save_data(_slot: String, _data: Dictionary) -> Dictionary:
 
 func load_data(_slot: String) -> Dictionary:
 	return {"success": false, "error": "save_repository_not_implemented"}
+
+func has_data(_slot: String) -> bool:
+	return false
+
+func delete_data(_slot: String) -> Dictionary:
+	return {"success": false, "error": "save_repository_not_implemented"}

@@ -1,14 +1,16 @@
-[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3]
-[ext_resource type="Script" path="res://systems/inventory/item_data.gd" id="1_item"]
-[ext_resource type="Script" path="res://systems/equipment/armor_stats.gd" id="2_armor"]
+[gd_resource type="Resource" script_class="ItemData" format=3 uid="uid://k4hehwm47nxl"]
+
+[ext_resource type="Script" uid="uid://bm7shhrg0ns0t" path="res://systems/inventory/item_data.gd" id="1_item"]
+[ext_resource type="Script" uid="uid://b08j42x2g34t1" path="res://systems/equipment/armor_stats.gd" id="2_armor"]
+
 [sub_resource type="Resource" id="ArmorStats_cloth"]
 script = ExtResource("2_armor")
 damage_reduction = 0.1
+
 [resource]
 script = ExtResource("1_item")
 id = "reinforced_cloth"
 display_name = "Tela reforzada"
 description = "Protección ligera que reduce el daño recibido."
 item_type = 1
-max_stack = 1
 armor_stats = SubResource("ArmorStats_cloth")

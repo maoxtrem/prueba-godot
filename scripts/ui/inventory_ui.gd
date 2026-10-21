@@ -2,26 +2,26 @@ extends Control
 class_name InventoryUI
 
 @onready var inventory_window: PanelContainer = $InventoryWindow
-@onready var grid: GridContainer = $InventoryWindow/Margin/VBox/SlotGrid
+@onready var grid: GridContainer = $InventoryWindow/Margin/VBox/Body/LeftPanel/LeftMargin/LeftVBox/SlotGrid
 @onready var occupied_label: Label = $InventoryWindow/Margin/VBox/Header/OccupiedLabel
 @onready var close_button: Button = $InventoryWindow/Margin/VBox/Header/CloseButton
-@onready var weapon_icon: TextureRect = $InventoryWindow/Margin/VBox/EquipmentPanel/EquipmentMargin/EquipmentRow/WeaponIcon
-@onready var weapon_marker: Label = $InventoryWindow/Margin/VBox/EquipmentPanel/EquipmentMargin/EquipmentRow/WeaponMarker
-@onready var weapon_name: Label = $InventoryWindow/Margin/VBox/EquipmentPanel/EquipmentMargin/EquipmentRow/WeaponName
-@onready var equip_button: Button = $InventoryWindow/Margin/VBox/EquipmentPanel/EquipmentMargin/EquipmentRow/EquipButton
-@onready var unequip_button: Button = $InventoryWindow/Margin/VBox/EquipmentPanel/EquipmentMargin/EquipmentRow/UnequipButton
-@onready var upgrade_equipped_button: Button = $InventoryWindow/Margin/VBox/EquipmentPanel/EquipmentMargin/EquipmentRow/UpgradeWeaponButton
-@onready var armor_icon: TextureRect = $InventoryWindow/Margin/VBox/EquipmentPanel/EquipmentMargin/ArmorRow/ArmorIcon
-@onready var armor_marker: Label = $InventoryWindow/Margin/VBox/EquipmentPanel/EquipmentMargin/ArmorRow/ArmorMarker
-@onready var armor_name: Label = $InventoryWindow/Margin/VBox/EquipmentPanel/EquipmentMargin/ArmorRow/ArmorName
-@onready var equip_armor_button: Button = $InventoryWindow/Margin/VBox/EquipmentPanel/EquipmentMargin/ArmorRow/EquipArmorButton
-@onready var unequip_armor_button: Button = $InventoryWindow/Margin/VBox/EquipmentPanel/EquipmentMargin/ArmorRow/UnequipArmorButton
-@onready var selected_name: Label = $InventoryWindow/Margin/VBox/Description/DescriptionMargin/DescriptionVBox/Name
-@onready var selected_description: Label = $InventoryWindow/Margin/VBox/Description/DescriptionMargin/DescriptionVBox/Details
-@onready var use_button: Button = $InventoryWindow/Margin/VBox/Description/DescriptionMargin/DescriptionVBox/UseButton
-@onready var use_message: Label = $InventoryWindow/Margin/VBox/Description/DescriptionMargin/DescriptionVBox/UseMessage
-@onready var upgrade_info: Label = $InventoryWindow/Margin/VBox/Description/DescriptionMargin/DescriptionVBox/UpgradeInfo
-@onready var upgrade_button: Button = $InventoryWindow/Margin/VBox/Description/DescriptionMargin/DescriptionVBox/UpgradeButton
+@onready var weapon_icon: TextureRect = $InventoryWindow/Margin/VBox/Body/RightPanel/Scroll/RightMargin/RightVBox/EquipmentPanel/EquipmentMargin/EquipmentVBox/WeaponRow/WeaponIcon
+@onready var weapon_marker: Label = $InventoryWindow/Margin/VBox/Body/RightPanel/Scroll/RightMargin/RightVBox/EquipmentPanel/EquipmentMargin/EquipmentVBox/WeaponRow/WeaponMarker
+@onready var weapon_name: Label = $InventoryWindow/Margin/VBox/Body/RightPanel/Scroll/RightMargin/RightVBox/EquipmentPanel/EquipmentMargin/EquipmentVBox/WeaponRow/WeaponName
+@onready var equip_button: Button = $InventoryWindow/Margin/VBox/ActionBar/EquipButton
+@onready var unequip_button: Button = $InventoryWindow/Margin/VBox/ActionBar/UnequipButton
+@onready var upgrade_equipped_button: Button = $InventoryWindow/Margin/VBox/ActionBar/UpgradeWeaponButton
+@onready var armor_icon: TextureRect = $InventoryWindow/Margin/VBox/Body/RightPanel/Scroll/RightMargin/RightVBox/ArmorPanel/ArmorMargin/ArmorRow/ArmorIcon
+@onready var armor_marker: Label = $InventoryWindow/Margin/VBox/Body/RightPanel/Scroll/RightMargin/RightVBox/ArmorPanel/ArmorMargin/ArmorRow/ArmorMarker
+@onready var armor_name: Label = $InventoryWindow/Margin/VBox/Body/RightPanel/Scroll/RightMargin/RightVBox/ArmorPanel/ArmorMargin/ArmorRow/ArmorName
+@onready var equip_armor_button: Button = $InventoryWindow/Margin/VBox/ActionBar/EquipArmorButton
+@onready var unequip_armor_button: Button = $InventoryWindow/Margin/VBox/ActionBar/UnequipArmorButton
+@onready var selected_name: Label = $InventoryWindow/Margin/VBox/Body/RightPanel/Scroll/RightMargin/RightVBox/Description/DescriptionMargin/DescriptionVBox/Name
+@onready var selected_description: Label = $InventoryWindow/Margin/VBox/Body/RightPanel/Scroll/RightMargin/RightVBox/Description/DescriptionMargin/DescriptionVBox/Details
+@onready var use_button: Button = $InventoryWindow/Margin/VBox/ActionBar/UseButton
+@onready var use_message: Label = $InventoryWindow/Margin/VBox/Body/RightPanel/Scroll/RightMargin/RightVBox/Description/DescriptionMargin/DescriptionVBox/UseMessage
+@onready var upgrade_info: Label = $InventoryWindow/Margin/VBox/Body/RightPanel/Scroll/RightMargin/RightVBox/Description/DescriptionMargin/DescriptionVBox/UpgradeInfo
+@onready var upgrade_button: Button = $InventoryWindow/Margin/VBox/ActionBar/UpgradeButton
 
 const SLOT_SCENE: PackedScene = preload("res://scenes/ui/inventory_slot_ui.tscn")
 const SLOT_COUNT: int = 20
@@ -366,11 +366,21 @@ func _update_equipment_buttons() -> void:
 		use_button.disabled = not consumables.can_use_item(visible_slots[selected_index].item.id).get("success", false)
 	var selected_instance := _selected_weapon_instance()
 	upgrade_button.disabled = weapon_upgrades == null or selected_instance == null or not weapon_upgrades.can_upgrade(selected_instance)
+	upgrade_button.visible = selected_instance != null
 	if selected_instance != null and weapon_upgrades != null:
 		upgrade_info.text = _weapon_upgrade_text(selected_instance)
 	var selected_is_armor := selected_index >= 0 and selected_index < visible_slots.size() and visible_slots[selected_index] != null and visible_slots[selected_index].item != null and visible_slots[selected_index].item.item_type == ItemData.ItemType.ARMOR
 	equip_armor_button.disabled = equipment == null or not selected_is_armor
 	unequip_armor_button.disabled = equipment == null or equipment.get_equipped_item(EquipmentComponent.EquipmentSlot.ARMOR) == null
+
+	# La barra inferior solo muestra acciones aplicables al contexto actual.
+	equip_button.visible = selected_is_weapon
+	upgrade_button.visible = selected_instance != null
+	use_button.visible = selected_is_consumable
+	equip_armor_button.visible = selected_is_armor
+	unequip_button.visible = equipment != null and equipment.get_equipped_item(EquipmentComponent.EquipmentSlot.WEAPON) != null
+	upgrade_equipped_button.visible = equipment != null and equipment.get_equipped_weapon_instance() != null
+	unequip_armor_button.visible = equipment != null and equipment.get_equipped_item(EquipmentComponent.EquipmentSlot.ARMOR) != null
 
 func _reason_text(reason: String) -> String:
 	var labels := {"health_full": "vida al máximo", "player_dead": "jugador muerto", "game_over": "partida terminada", "not_in_inventory": "no está en el inventario"}

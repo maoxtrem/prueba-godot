@@ -15,13 +15,18 @@ func _run() -> void:
 
 	var inventory_ui = main_instance.get_node("HUD/InventoryUI")
 	var inventory = main_instance.get_node("Player/InventoryComponent")
-	var grid = inventory_ui.get_node("InventoryWindow/Margin/VBox/SlotGrid")
+	var grid = inventory_ui.get_node("InventoryWindow/Margin/VBox/Body/LeftPanel/LeftMargin/LeftVBox/SlotGrid")
 	var occupied_label = inventory_ui.get_node("InventoryWindow/Margin/VBox/Header/OccupiedLabel")
-	var description_name = inventory_ui.get_node("InventoryWindow/Margin/VBox/Description/DescriptionMargin/DescriptionVBox/Name")
+	var description_name = inventory_ui.get_node("InventoryWindow/Margin/VBox/Body/RightPanel/Scroll/RightMargin/RightVBox/Description/DescriptionMargin/DescriptionVBox/Name")
+	var inventory_window: PanelContainer = inventory_ui.get_node("InventoryWindow")
+	var action_bar: HBoxContainer = inventory_ui.get_node("InventoryWindow/Margin/VBox/ActionBar")
 
 	_check(InputMap.has_action("toggle_inventory"), "registrar acción toggle_inventory")
 	_check(inventory_ui.process_mode == Node.PROCESS_MODE_ALWAYS, "procesar UI durante juego y pausa")
 	_check(grid.get_child_count() == 20, "mostrar exactamente 20 espacios")
+	_check(inventory_window.custom_minimum_size == Vector2(1040, 600), "definir tamaño mínimo del panel principal")
+	_check(grid.get_child(0).custom_minimum_size == Vector2(72, 72), "mantener tamaño uniforme de las casillas")
+	_check(action_bar.get_child_count() == 7, "separar las acciones en una barra inferior")
 	_check(not inventory_ui.visible, "iniciar con inventario cerrado")
 	var debug_settings: DebugSettings = main_instance.debug_settings.duplicate()
 	debug_settings.debug_enabled = true

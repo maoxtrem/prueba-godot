@@ -56,6 +56,8 @@ func validate(data: Variant) -> Dictionary:
 		return _invalid("invalid_upgrades")
 	if not _validate_quests(game.get("quests", null)):
 		return _invalid("invalid_quests")
+	if not _validate_effects(game.get("temporary_effects", [])):
+		return _invalid("invalid_temporary_effects")
 	return {"success": true, "data": data}
 
 func deserialize(data: Variant) -> Dictionary:
@@ -76,6 +78,20 @@ func resolve_item(item_id: String) -> ItemData:
 			if resource is ItemData and resource.id == item_id:
 				directory.list_dir_end()
 				return resource
+		filename = directory.get_next()
+	directory.list_dir_end()
+	return null
+
+func resolve_consumable_effect(effect_id: String) -> ConsumableData:
+	var directory := DirAccess.open("res://resources/items")
+	if directory == null: return null
+	directory.list_dir_begin()
+	var filename := directory.get_next()
+	while not filename.is_empty():
+		if not directory.current_is_dir() and filename.ends_with(".tres"):
+			var resource := load("res://resources/items/" + filename)
+			if resource is ItemData and resource.consumable_data != null and resource.consumable_data.effect_id == effect_id:
+				directory.list_dir_end(); return resource.consumable_data
 		filename = directory.get_next()
 	directory.list_dir_end()
 	return null
@@ -172,22 +188,26 @@ func _validate_equipment(value: Variant, inventory: Dictionary) -> bool:
 func _validate_upgrades(value: Variant) -> bool:
 	if not value is Dictionary: return false
 	for key in value.keys():
-		if not key is String or not _is_known_upgrade(String(key)) or not _is_integer(value[key]) or int(value[key]) < 0: return false
+		var upgrade := _find_upgrade(String(key))
+		if not key is String or upgrade == null or not _is_integer(value[key]) or int(value[key]) < 0 or int(value[key]) > upgrade.max_level: return false
 	return true
 
 func _is_known_upgrade(upgrade_id: String) -> bool:
+	return _find_upgrade(upgrade_id) != null
+
+func _find_upgrade(upgrade_id: String) -> UpgradeData:
 	var directory := DirAccess.open("res://resources/upgrades")
-	if directory == null: return false
+	if directory == null: return null
 	directory.list_dir_begin()
 	var filename := directory.get_next()
 	while not filename.is_empty():
 		if not directory.current_is_dir() and filename.ends_with(".tres"):
 			var resource := load("res://resources/upgrades/" + filename)
 			if resource is UpgradeData and resource.id == upgrade_id:
-				directory.list_dir_end(); return true
+				directory.list_dir_end(); return resource
 		filename = directory.get_next()
 	directory.list_dir_end()
-	return false
+	return null
 
 func _validate_quests(value: Variant) -> bool:
 	if value == null: return true
@@ -196,6 +216,31 @@ func _validate_quests(value: Variant) -> bool:
 		if not value.get(field, {}) is Dictionary: return false
 		for quest_id in value[field].keys():
 			if not quest_id is String or not _is_known_quest(String(quest_id)): return false
+	var pending = value.get("pending_rewards", {})
+	if not pending is Dictionary: return false
+	for quest_id in pending.keys():
+		if not quest_id is String or not _is_known_quest(String(quest_id)): return false
+		if not pending[quest_id] is Array: return false
+		for reward in pending[quest_id]:
+			if not reward is Dictionary or not _is_integer(reward.get("reward_type", -1)) or not _is_integer(reward.get("amount", 0)):
+				return false
+			if int(reward.reward_type) < QuestReward.RewardType.HEALTH or int(reward.reward_type) > QuestReward.RewardType.MATERIAL or int(reward.amount) <= 0:
+				return false
+			if int(reward.reward_type) == QuestReward.RewardType.MATERIAL:
+				var item := resolve_item(String(reward.get("item_id", "")))
+				if item == null or item.item_type != ItemData.ItemType.MATERIAL: return false
+	return true
+
+func _validate_effects(value: Variant) -> bool:
+	if not value is Array: return false
+	var seen: Dictionary = {}
+	for entry in value:
+		if not entry is Dictionary: return false
+		var effect_id := String(entry.get("effect_id", ""))
+		var remaining = entry.get("remaining", -1.0)
+		if effect_id.is_empty() or seen.has(effect_id) or not _is_number(remaining) or float(remaining) <= 0.0:
+			return false
+		seen[effect_id] = true
 	return true
 
 func _is_known_quest(quest_id: String) -> bool:
@@ -215,6 +260,9 @@ func _is_known_quest(quest_id: String) -> bool:
 func _is_integer(value: Variant) -> bool:
 	if not value is int and not value is float: return false
 	return is_finite(float(value)) and is_equal_approx(float(value), floorf(float(value)))
+
+func _is_number(value: Variant) -> bool:
+	return (value is int or value is float) and is_finite(float(value))
 
 func _invalid(reason: String) -> Dictionary:
 	return {"success": false, "error": reason}

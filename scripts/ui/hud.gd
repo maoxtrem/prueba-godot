@@ -16,6 +16,7 @@ signal restart_requested
 @onready var game_over_ui: GameOverUI = $GameOverUI
 @onready var upgrade_shop: UpgradeShop = $UpgradeShop
 @onready var quest_ui: QuestUI = $QuestUI
+@onready var pause_ui: PauseUI = $PauseUI
 
 
 # ==========================================
@@ -86,6 +87,7 @@ func show_game_over(wave: int, total_kills: int) -> void:
 	inventory_ui.close_inventory()
 	upgrade_shop.visible = false
 	quest_ui.hide_quests()
+	pause_ui.hide_pause()
 	game_over_ui.show_game_over(wave, total_kills)
 
 

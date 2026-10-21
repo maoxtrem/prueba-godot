@@ -57,6 +57,27 @@ func is_completed(quest_id: String) -> bool:
 func has_pending_reward(quest_id: String) -> bool:
 	return pending_rewards.has(quest_id)
 
+func restore_state(restored: Dictionary) -> bool:
+	if restored == null: return true
+	for quest_id in restored.get("progress", {}).keys():
+		if _find_quest(String(quest_id)) == null: return false
+	progress = restored.get("progress", {}).duplicate(true)
+	completed = restored.get("completed", {}).duplicate(true)
+	claimed = restored.get("claimed", {}).duplicate(true)
+	pending_rewards.clear()
+	for quest_id in restored.get("pending_rewards", {}).keys():
+		var rewards: Array[QuestReward] = []
+		for entry in restored.pending_rewards[quest_id]:
+			var reward := QuestReward.new()
+			reward.reward_type = int(entry.get("reward_type", 0))
+			reward.amount = int(entry.get("amount", 0))
+			reward.item_id = String(entry.get("item_id", ""))
+			reward.item = _find_item(reward.item_id)
+			if not reward.is_valid() or (reward.reward_type == QuestReward.RewardType.MATERIAL and reward.item == null): return false
+			rewards.append(reward)
+		pending_rewards[String(quest_id)] = rewards
+	return true
+
 func can_claim(quest_id: String) -> bool:
 	return is_completed(quest_id) and not claimed.get(quest_id, false)
 
@@ -121,12 +142,13 @@ func _find_quest(quest_id: String) -> QuestData:
 	return null
 
 func _find_item(item_id: String) -> ItemData:
-	if inventory == null:
-		return null
-	for slot in inventory.get_slots():
-		if slot.item != null and slot.item.id == item_id:
-			return slot.item
-	return null
+	if inventory != null:
+		for slot in inventory.get_slots():
+			if slot.item != null and slot.item.id == item_id:
+				return slot.item
+	# Las recompensas pendientes también deben poder restaurarse cuando el
+	# material todavía no está presente en el inventario.
+	return SaveSerializer.new().resolve_item(item_id)
 
 func _copy_rewards(rewards: Array[QuestReward]) -> Array:
 	var result: Array = []

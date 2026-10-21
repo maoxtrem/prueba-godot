@@ -38,6 +38,15 @@ func load_data(slot: String) -> Dictionary:
 		return result
 	return {"success": true, "data": result.data}
 
+func has_data(slot: String) -> bool:
+	return _is_safe_slot(slot) and FileAccess.file_exists(_path_for(slot))
+
+func delete_data(slot: String) -> Dictionary:
+	if not _is_safe_slot(slot): return {"success": false, "error": "invalid_slot"}
+	if not FileAccess.file_exists(_path_for(slot)): return {"success": true, "deleted": false}
+	var error := DirAccess.remove_absolute(_path_for(slot))
+	return {"success": error == OK, "deleted": error == OK, "error": "delete_failed" if error != OK else ""}
+
 func _read_json_file(path: String) -> Dictionary:
 	if not FileAccess.file_exists(path):
 		return {"success": false, "error": "file_not_found"}

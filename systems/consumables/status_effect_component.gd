@@ -42,6 +42,17 @@ func get_remaining(effect_id: String) -> float:
 func has_effect(effect_id: String) -> bool:
 	return active_effects.has(effect_id)
 
+func restore_effects(restored: Array, resolver: Callable) -> bool:
+	active_effects.clear()
+	for entry in restored:
+		if not entry is Dictionary: return false
+		var data: ConsumableData = resolver.call(String(entry.get("effect_id", "")))
+		var remaining := float(entry.get("remaining", -1.0))
+		if data == null or not data.is_valid() or remaining <= 0.0 or remaining > data.duration: return false
+		active_effects[data.effect_id] = {"data": data, "remaining": remaining}
+	_refresh_effective_stats()
+	return true
+
 func _refresh_effective_stats() -> void:
 	var damage_multiplier := 1.0
 	var movement_multiplier := 1.0

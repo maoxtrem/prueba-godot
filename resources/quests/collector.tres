@@ -1,18 +1,21 @@
-[gd_resource type="Resource" script_class="QuestData" load_steps=5 format=3]
-[ext_resource type="Script" path="res://systems/quests/quest_data.gd" id="1_q"]
-[ext_resource type="Script" path="res://systems/quests/quest_objective.gd" id="2_o"]
-[ext_resource type="Script" path="res://systems/quests/quest_reward.gd" id="3_r"]
+[gd_resource type="Resource" script_class="QuestData" format=3 uid="uid://drk07dsx3km2s"]
+
+[ext_resource type="Script" uid="uid://75jrshvg0ia7" path="res://systems/quests/quest_data.gd" id="1_q"]
+[ext_resource type="Script" uid="uid://dqjnyjo4smsxb" path="res://systems/quests/quest_objective.gd" id="2_o"]
+[ext_resource type="Script" uid="uid://diirexirp8mdj" path="res://systems/quests/quest_reward.gd" id="3_r"]
 [ext_resource type="Resource" path="res://resources/items/test_material.tres" id="4_item"]
+
 [sub_resource type="Resource" id="Objective"]
 script = ExtResource("2_o")
 objective_type = 2
 target_amount = 10
+
 [sub_resource type="Resource" id="Reward"]
 script = ExtResource("3_r")
 reward_type = 1
 amount = 15
-item_id = "blood_fragment"
 item = ExtResource("4_item")
+
 [resource]
 script = ExtResource("1_q")
 id = "collector"

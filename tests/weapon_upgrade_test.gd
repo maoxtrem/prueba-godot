@@ -56,9 +56,9 @@ func _run() -> void:
 	var main_ui: InventoryUI = main_instance.get_node("HUD/InventoryUI")
 	main_inventory.add_item(SWORD, 1)
 	main_inventory.add_item(MATERIAL, 5)
-	var grid: GridContainer = main_ui.get_node("InventoryWindow/Margin/VBox/SlotGrid")
+	var grid: GridContainer = main_ui.get_node("InventoryWindow/Margin/VBox/Body/LeftPanel/LeftMargin/LeftVBox/SlotGrid")
 	grid.get_child(0)._on_pressed()
-	main_ui.get_node("InventoryWindow/Margin/VBox/Description/DescriptionMargin/DescriptionVBox/UpgradeButton").emit_signal("pressed")
+	main_ui.get_node("InventoryWindow/Margin/VBox/ActionBar/UpgradeButton").emit_signal("pressed")
 	_check(main_inventory.get_slots()[0].weapon_instance.upgrade_level == 1, "mejorar arma desde InventoryUI")
 
 	print("Weapon upgrade tests: ", checks, " comprobaciones correctas")

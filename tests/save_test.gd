@@ -42,6 +42,7 @@ func _run() -> void:
 	_check(save_manager.serializer.validate(serialized).success, "validar partida serializada")
 	var saved := save_manager.save_game("phase12_test")
 	_check(saved.success, "guardar JSON local")
+	_check(save_manager.has_save("phase12_test"), "detectar guardado válido")
 	var loaded := save_manager.load_game("phase12_test")
 	_check(loaded.success, "cargar JSON local")
 	if not loaded.success:
@@ -53,6 +54,24 @@ func _run() -> void:
 	_check(int(loaded_game.upgrades.light_legs) == 1, "conservar mejoras del personaje")
 	_check(int(loaded_game.quests.progress.first_kills) == 5 and loaded_game.wave.kills == waves.total_kills, "conservar misiones y estadísticas de oleada")
 	_check(loaded_game.temporary_effects.size() == 1, "reservar efectos temporales")
+
+	var restored_main = load("res://scenes/main.tscn").instantiate()
+	restored_main.start_in_menu = true
+	root.add_child(restored_main)
+	set_current_scene(restored_main)
+	await process_frame
+	restored_main.save_manager.repository = test_repository
+	restored_main.save_manager.default_slot = "phase12_test"
+	var continued: Dictionary = restored_main.continue_saved_game()
+	_check(continued.success, "continuar partida desde el menú")
+	_check(restored_main.player.health.current_health == main_instance.player.health.current_health, "restaurar vida sin consumirla")
+	_check(restored_main.inventory.get_item_quantity("test_material") == inventory.get_item_quantity("test_material"), "restaurar cantidades del inventario")
+	var restored_weapon: WeaponInstance = restored_main.equipment.get_equipped_weapon_instance()
+	_check(restored_weapon != null and restored_weapon.instance_id == slots[0].weapon_instance.instance_id, "restaurar arma equipada")
+	_check(restored_main.upgrades.upgrade_levels.get("light_legs", 0) == 1, "restaurar mejora comprada")
+	_check(restored_main.quest_manager.progress.get("first_kills", 0) == 5, "restaurar progreso de misiones")
+	_check(restored_main.player.get_node("StatusEffectComponent").has_effect("fury_elixir"), "restaurar efecto temporal")
+	restored_main.queue_free()
 
 	var missing := save_manager.load_game("slot_that_does_not_exist")
 	_check(not missing.success and missing.error == "file_not_found", "manejar archivo inexistente")
@@ -75,6 +94,7 @@ func _run() -> void:
 	duplicate_instance.game.inventory.slots.append(duplicate_entry)
 	_check(not save_manager.serializer.validate(duplicate_instance).success, "rechazar instancia duplicada")
 	_check(not JsonSaveRepository.new().save_data("../unsafe", serialized).success, "rechazar slot inseguro")
+	_check(save_manager.delete_save("phase12_test").success and not save_manager.has_save("phase12_test"), "eliminar guardado explícitamente")
 
 	print("Save tests: ", checks, " comprobaciones correctas")
 	quit()

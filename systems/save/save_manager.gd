@@ -25,13 +25,33 @@ func save_game(slot: String = "") -> Dictionary:
 	else: save_failed.emit(target, result.get("error", "save_failed"))
 	return result
 
-func load_game(slot: String = "") -> Dictionary:
+func load_game(slot: String = "", apply_state: bool = false) -> Dictionary:
 	var target := slot if not slot.is_empty() else default_slot
 	if repository == null: repository = JsonSaveRepository.new()
 	var result := repository.load_data(target)
 	if not result.success: return result
 	if serializer == null: serializer = SaveSerializer.new()
-	return serializer.deserialize(result.data)
+	var loaded := serializer.deserialize(result.data)
+	if loaded.success and apply_state:
+		if game_root == null or not game_root.has_method("restore_from_save"):
+			return {"success": false, "error": "restore_not_supported"}
+		var restored: Dictionary = game_root.restore_from_save(loaded.data)
+		if not restored.success: return restored
+	return loaded
+
+func has_save(slot: String = "") -> bool:
+	var target := slot if not slot.is_empty() else default_slot
+	if repository == null: repository = JsonSaveRepository.new()
+	if not repository.has_data(target): return false
+	var loaded := repository.load_data(target)
+	if not loaded.success: return false
+	if serializer == null: serializer = SaveSerializer.new()
+	return serializer.validate(loaded.data).success
+
+func delete_save(slot: String = "") -> Dictionary:
+	var target := slot if not slot.is_empty() else default_slot
+	if repository == null: repository = JsonSaveRepository.new()
+	return repository.delete_data(target)
 
 func _failure(slot: String, reason: String) -> Dictionary:
 	save_failed.emit(slot, reason)

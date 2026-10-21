@@ -47,6 +47,19 @@ func reset_upgrades() -> void:
 	_refresh_effective_stats()
 	upgrades_changed.emit()
 
+func restore_levels(restored_levels: Dictionary) -> bool:
+	for key in restored_levels.keys():
+		var upgrade := _find_upgrade(String(key))
+		var level := int(restored_levels[key])
+		if upgrade == null or level < 0 or level > upgrade.max_level:
+			return false
+	upgrade_levels.clear()
+	for key in restored_levels.keys():
+		upgrade_levels[String(key)] = int(restored_levels[key])
+	_refresh_effective_stats()
+	upgrades_changed.emit()
+	return true
+
 func _find_upgrade(upgrade_id: String) -> UpgradeData:
 	for upgrade in available_upgrades:
 		if upgrade != null and upgrade.id == upgrade_id:

@@ -113,6 +113,14 @@ func get_equipped_item(slot: EquipmentSlot) -> ItemData:
 func get_equipped_weapon_instance() -> WeaponInstance:
 	return equipped_weapon_instance
 
+func restore_equipment(weapon_instance: WeaponInstance, armor: ItemData) -> void:
+	equipped_weapon_instance = weapon_instance
+	equipped_weapon = weapon_instance.item if weapon_instance != null else null
+	equipped_armor = armor
+	equipment_changed.emit(EquipmentSlot.WEAPON, equipped_weapon)
+	weapon_instance_changed.emit(equipped_weapon_instance)
+	equipment_changed.emit(EquipmentSlot.ARMOR, equipped_armor)
+
 func get_enemy_damage_multiplier() -> float:
 	if equipped_armor == null or equipped_armor.armor_stats == null:
 		return 1.0

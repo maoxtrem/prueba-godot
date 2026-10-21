@@ -147,6 +147,15 @@ func resume_pending_wave() -> void:
 	if next_wave_pending:
 		start_next_wave()
 
+func restore_statistics(wave: int, kills: int) -> bool:
+	if wave < 0 or kills < 0: return false
+	current_wave = wave
+	total_kills = kills
+	remaining_enemies = 0
+	wave_active = false
+	next_wave_pending = wave > 0
+	return true
+
 
 # ==========================================
 # ENEMIGO ELIMINADO

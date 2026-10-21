@@ -4,5 +4,5 @@
 
 [resource]
 script = ExtResource("1_debug")
-debug_enabled = false
-player_invulnerable = false
+debug_enabled = true
+player_invulnerable = true

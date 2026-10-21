@@ -2,6 +2,8 @@
 extends Node2D
 
 @export var debug_settings: DebugSettings
+@export var start_in_menu: bool = false
+@export var safe_wave_checkpoints: bool = false
 
 # ==========================================
 # REFERENCIAS
@@ -38,7 +40,8 @@ func _ready() -> void:
 	hud.set_consumables(consumables)
 	hud.set_weapon_upgrades(weapon_upgrades)
 	hud.set_quest_manager(quest_manager)
-	game_manager.start_game()
+	if not start_in_menu:
+		game_manager.start_game()
 
 	# Conectar eventos de las oleadas
 	wave_manager.wave_started.connect(
@@ -56,6 +59,8 @@ func _ready() -> void:
 	)
 	wave_manager.enemy_killed.connect(quest_manager.register_enemy_kill)
 	wave_manager.wave_completed.connect(quest_manager.register_wave_completed)
+	if safe_wave_checkpoints:
+		wave_manager.wave_completed.connect(_on_wave_completed_checkpoint)
 	player.get_node("PickupComponent").item_collected.connect(quest_manager.register_items_collected)
 
 	# Conectar cambios de vida del jugador
@@ -95,6 +100,131 @@ func _on_restart_requested() -> void:
 		return
 
 	get_tree().reload_current_scene()
+
+func start_new_game() -> bool:
+	if game_manager.current_state != GameManager.GameState.READY:
+		return false
+	if not game_manager.start_game():
+		return false
+	wave_manager.resume_pending_wave()
+	return true
+
+func continue_saved_game() -> Dictionary:
+	if game_manager.current_state != GameManager.GameState.READY:
+		return {"success": false, "error": "game_already_started"}
+	var result := save_manager.load_game("", true)
+	if not result.success:
+		return result
+	if not game_manager.start_game():
+		return {"success": false, "error": "could_not_start_game"}
+	wave_manager.resume_pending_wave()
+	return {"success": true}
+
+func restore_from_save(data: Dictionary) -> Dictionary:
+	var serializer := SaveSerializer.new()
+	var validation := serializer.validate(data)
+	if not validation.success:
+		return validation
+	var game: Dictionary = data.game
+	var player_node = player
+	var inventory_data: Dictionary = game.inventory
+	var restored_slots: Array[InventorySlot] = []
+	var seen_instances: Dictionary = {}
+	for entry in inventory_data.slots:
+		var item: ItemData = serializer.resolve_item(String(entry.item_id))
+		if item == null: return {"success": false, "error": "unknown_item"}
+		if item.item_type == ItemData.ItemType.WEAPON:
+			var weapon_data: Dictionary = entry.weapon_instance
+			var instance := WeaponInstance.new(item, String(weapon_data.instance_id))
+			instance.upgrade_level = int(weapon_data.upgrade_level)
+			if seen_instances.has(instance.instance_id): return {"success": false, "error": "duplicate_weapon_instance"}
+			seen_instances[instance.instance_id] = true
+			restored_slots.append(InventorySlot.new(item, 1, instance))
+		else:
+			var slot := InventorySlot.new(item, int(entry.quantity))
+			restored_slots.append(slot)
+	var equipment_data: Dictionary = game.equipment
+	var weapon_instance: WeaponInstance
+	if not equipment_data.weapon.is_empty():
+		var weapon_item := serializer.resolve_item(String(equipment_data.weapon.item_id))
+		if weapon_item == null: return {"success": false, "error": "unknown_equipped_weapon"}
+		weapon_instance = WeaponInstance.new(weapon_item, String(equipment_data.weapon.instance_id))
+		weapon_instance.upgrade_level = int(equipment_data.weapon.upgrade_level)
+		if seen_instances.has(weapon_instance.instance_id): return {"success": false, "error": "duplicate_weapon_instance"}
+		seen_instances[weapon_instance.instance_id] = true
+	var armor: ItemData = null
+	if not String(equipment_data.armor_item_id).is_empty():
+		armor = serializer.resolve_item(String(equipment_data.armor_item_id))
+		if armor == null: return {"success": false, "error": "unknown_equipped_armor"}
+	# Aplicar solo después de validar y preparar todas las referencias.
+	equipment.restore_equipment(null, null)
+	if not inventory.replace_slots(restored_slots, int(inventory_data.capacity)):
+		return {"success": false, "error": "inventory_restore_failed"}
+	equipment.restore_equipment(weapon_instance, armor)
+	if not upgrades.restore_levels(game.upgrades): return {"success": false, "error": "upgrade_restore_failed"}
+	if not quest_manager.restore_state(game.quests): return {"success": false, "error": "quest_restore_failed"}
+	var health_data: Dictionary = game.health
+	player_node.health.max_health = float(health_data.maximum)
+	player_node.health.current_health = float(health_data.current)
+	player_node.health.is_dead = false
+	player_node.health.health_changed.emit(player_node.health.current_health, player_node.health.max_health)
+	if not effects_restore(game.temporary_effects): return {"success": false, "error": "effect_restore_failed"}
+	if not wave_manager.restore_statistics(int(game.wave.current), int(game.wave.kills)):
+		return {"success": false, "error": "wave_restore_failed"}
+	_sync_hud()
+	return {"success": true}
+
+func effects_restore(restored: Array) -> bool:
+	var serializer := SaveSerializer.new()
+	return player.get_node("StatusEffectComponent").restore_effects(restored, Callable(serializer, "resolve_consumable_effect"))
+
+func can_save_game() -> bool:
+	return game_manager.current_state == GameManager.GameState.PAUSED and not game_manager.is_game_over() and not wave_manager.wave_active and not _has_active_enemies()
+
+func _has_active_enemies() -> bool:
+	for enemy in $EnemyContainer.get_children():
+		if not enemy.is_queued_for_deletion():
+			return true
+	return false
+
+func save_current_game() -> Dictionary:
+	if not can_save_game():
+		return {"success": false, "error": "unsafe_checkpoint"}
+	return save_manager.save_game()
+
+func toggle_pause_menu() -> bool:
+	if hud.pause_ui.visible:
+		return close_pause_menu()
+	if game_manager.current_state != GameManager.GameState.PLAYING:
+		return false
+	if hud.inventory_ui.visible or hud.upgrade_shop.visible or hud.quest_ui.visible:
+		return false
+	if not game_manager.pause_game():
+		return false
+	hud.pause_ui.show_pause()
+	return true
+
+func close_pause_menu() -> bool:
+	if not hud.pause_ui.visible:
+		return false
+	hud.pause_ui.hide_pause()
+	if not game_manager.resume_game():
+		return false
+	wave_manager.resume_pending_wave()
+	return true
+
+func _on_wave_completed_checkpoint(_wave: int) -> void:
+	if not safe_wave_checkpoints or game_manager.is_game_over():
+		return
+	if game_manager.pause_game():
+		hud.pause_ui.show_pause()
+		hud.pause_ui.set_message("Punto seguro entre oleadas.")
+
+func _sync_hud() -> void:
+	hud.update_wave(wave_manager.current_wave, wave_manager.remaining_enemies)
+	hud.update_enemies(wave_manager.remaining_enemies)
+	hud.update_kills(wave_manager.total_kills)
+	hud.update_health(player.health.current_health, player.health.max_health)
 
 func open_quests() -> bool:
 	if game_manager.is_game_over():
