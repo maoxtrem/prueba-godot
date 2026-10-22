@@ -6,6 +6,5 @@
 script = ExtResource("1_debug")
 debug_enabled = true
 player_invulnerable = true
-infinite_health = true
 grant_test_ranged_weapons = true
 grant_test_capacity_potions = true

@@ -28,7 +28,8 @@ func _run() -> void:
 	var enemies: Array[Node] = main_instance.get_node("EnemyContainer").get_children()
 	print("Idle diagnóstico: estado=", state_after_idle, " vida=", health_after_idle, " posición=", player.global_position, " enemigos=", enemies.size())
 
-	_check(state_after_idle == GameManager.GameState.GAME_OVER, "entrar en GAME_OVER después de permanecer quieto y recibir daño")
+	_check(state_after_idle == GameManager.GameState.PLAYING, "permanecer en PLAYING al estar quieto fuera de detección")
+	_check(is_equal_approx(health_after_idle, health.max_health), "no recibir daño de enemigos en IDLE distante")
 	_check(player.velocidad_efectiva > 0.0, "conservar velocidad efectiva después de estar quieto")
 
 	var position_before_input: Vector2 = player.global_position

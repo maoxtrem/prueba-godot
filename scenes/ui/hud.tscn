@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/pause_ui.tscn" id="6_pause_ui"]
 [ext_resource type="PackedScene" path="res://scenes/ui/between_waves_ui.tscn" id="7_between_waves"]
 [ext_resource type="Theme" path="res://resources/themes/game_ui_theme.tres" id="8_theme"]
+[ext_resource type="PackedScene" path="res://scenes/ui/minimap.tscn" id="9_minimap"]
 
 [node name="HUD" type="CanvasLayer" unique_id=1296587215]
 script = ExtResource("1_0mwgc")
@@ -21,6 +22,8 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 theme = ExtResource("8_theme")
+
+[node name="Minimap" parent="Interface" instance=ExtResource("9_minimap")]
 
 [node name="StatusPanel" type="PanelContainer" parent="Interface"]
 custom_minimum_size = Vector2(230, 190)

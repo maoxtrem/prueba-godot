@@ -2,6 +2,8 @@
 extends Node
 class_name WaveManager
 
+const WORLD_BOUNDS = preload("res://systems/world/world_bounds.gd")
+
 # ==========================================
 # SEÑALES
 # ==========================================
@@ -19,7 +21,11 @@ signal enemy_killed(total_kills: int)
 @export var enemy_scene: PackedScene
 @export var initial_enemies: int = 3
 @export var enemies_per_wave: int = 2
-@export var spawn_radius: float = 450.0
+@export var spawn_radius: float = 650.0
+@export var minimum_spawn_distance: float = 250.0
+@export var maximum_spawn_distance: float = 650.0
+@export_range(1, 128, 1) var spawn_attempts: int = 32
+@export var debug_settings: DebugSettings
 
 
 # ==========================================
@@ -50,6 +56,10 @@ var next_wave_pending: bool = false
 func _ready() -> void:
 	var token := deferred_start_token
 	call_deferred("_start_deferred", token)
+
+
+func configure_debug(settings: DebugSettings) -> void:
+	debug_settings = settings
 
 
 func _start_deferred(token: int) -> void:
@@ -106,6 +116,7 @@ func start_next_wave() -> void:
 
 	for i in range(amount):
 		spawn_enemy()
+	_debug_spawn_summary()
 
 
 # ==========================================
@@ -132,17 +143,82 @@ func spawn_enemy() -> void:
 
 	enemy_container.add_child(enemy)
 	enemy.jugador = player
+	enemy.wave_manager = self
+	var spawn_position := _find_spawn_position()
+	enemy.global_position = spawn_position
+	enemy.set_spawn_position(spawn_position)
 
-	# Posicion aleatoria alrededor del jugador
-	var angle := randf_range(0.0, TAU)
 
-	var offset := (
-		Vector2.RIGHT.rotated(angle) * spawn_radius
-	)
+func _find_spawn_position() -> Vector2:
+	var area := WORLD_BOUNDS.playable_rect()
+	var minimum_distance := maxf(minimum_spawn_distance, 0.0)
+	var maximum_distance := maxf(maximum_spawn_distance, minimum_distance)
+	var existing := enemy_container.get_children()
+	for _attempt in range(maxi(spawn_attempts, 1)):
+		var distance := randf_range(minimum_distance, maximum_distance)
+		var candidate := player.global_position + Vector2.RIGHT.rotated(randf_range(0.0, TAU)) * distance
+		if not area.has_point(candidate):
+			continue
+		if _overlaps_existing(candidate, existing):
+			continue
+		return candidate
 
-	enemy.global_position = (
-		player.global_position + offset
-	)
+	# Alternativa determinista para bordes o escenarios muy ocupados. Se prueban
+	# direcciones y distancias válidas antes de aceptar una posición recortada.
+	for distance_value in [maximum_distance, (minimum_distance + maximum_distance) * 0.5, minimum_distance]:
+		var distance: float = float(distance_value)
+		for index in range(16):
+			var candidate: Vector2 = player.global_position + Vector2.RIGHT.rotated(TAU * float(index) / 16.0) * distance
+			if area.has_point(candidate) and not _overlaps_existing(candidate, existing):
+				return candidate
+
+	# El mapa actual siempre permite el anillo configurado, pero conservar una
+	# alternativa segura para configuraciones futuras o escenarios saturados.
+	var fallback := WORLD_BOUNDS.clamp_position(player.global_position + Vector2.RIGHT * minimum_distance)
+	return fallback if not _overlaps_existing(fallback, existing) else WORLD_BOUNDS.clamp_position(player.global_position + Vector2.DOWN * minimum_distance)
+
+
+func _debug_spawn_summary() -> void:
+	if debug_settings == null or not debug_settings.debug_enabled:
+		return
+	var nearest_distance := INF
+	var alive := 0
+	for node in enemy_container.get_children():
+		if not is_instance_valid(node) or not node is Enemy:
+			continue
+		var enemy := node as Enemy
+		if enemy.health.is_dead:
+			continue
+		alive += 1
+		nearest_distance = minf(nearest_distance, player.global_position.distance_to(enemy.global_position))
+		print("[DEBUG SPAWN] enemigo=", enemy.global_position, " distancia=", snappedf(player.global_position.distance_to(enemy.global_position), 0.01))
+	print("[DEBUG SPAWN] vivos=", alive, " mas_cercano=", snappedf(nearest_distance, 0.01))
+
+
+func _overlaps_existing(candidate: Vector2, existing: Array[Node]) -> bool:
+	for node in existing:
+		if is_instance_valid(node) and node is Node2D and candidate.distance_to(node.global_position) < 96.0:
+			return true
+	return false
+
+
+func alert_nearby(source: Enemy, last_known_position: Vector2) -> void:
+	var game_manager := get_parent().get_node_or_null("GameManager")
+	if source == null or (game_manager != null and not game_manager.can_process_waves()):
+		return
+	var candidates: Array[Dictionary] = []
+	for node in enemy_container.get_children():
+		if node == source or not is_instance_valid(node) or not node is Enemy:
+			continue
+		var enemy := node as Enemy
+		if enemy.health.is_dead or enemy.ai_state == Enemy.AIState.CHASE:
+			continue
+		var distance := source.global_position.distance_to(enemy.global_position)
+		if distance <= source.alert_radius:
+			candidates.append({"enemy": enemy, "distance": distance})
+	candidates.sort_custom(func(a: Dictionary, b: Dictionary): return a.distance < b.distance)
+	for index in range(mini(source.max_alerted_companions, candidates.size())):
+		(candidates[index]["enemy"] as Enemy).receive_alert(last_known_position)
 
 
 func resume_pending_wave() -> void:

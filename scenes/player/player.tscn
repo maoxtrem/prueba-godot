@@ -30,6 +30,14 @@ radius = 100.0
 collision_mask = 4
 script = ExtResource("1_onrkg")
 
+[node name="Camera2D" type="Camera2D" parent="."]
+position_smoothing_enabled = true
+position_smoothing_speed = 8.0
+limit_left = 0
+limit_top = 0
+limit_right = 4000
+limit_bottom = 4000
+
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1120788831]
 texture = ExtResource("2_i3pqv")
 

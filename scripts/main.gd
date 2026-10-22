@@ -1,6 +1,8 @@
 
 extends Node2D
 
+const WORLD_BOUNDS = preload("res://systems/world/world_bounds.gd")
+
 @export var debug_settings: DebugSettings
 @export var start_in_menu: bool = false
 @export var safe_wave_checkpoints: bool = false
@@ -22,6 +24,7 @@ extends Node2D
 @onready var game_manager: GameManager = $GameManager
 @onready var quest_manager: QuestManager = $QuestManager
 @onready var save_manager: SaveManager = $SaveManager
+@onready var noise_manager = $NoiseManager
 
 
 # ==========================================
@@ -32,7 +35,10 @@ func _ready() -> void:
 	# Centraliza las acciones de interfaz y sigue activo durante pausas modales.
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	player.configure_debug(debug_settings)
+	wave_manager.configure_debug(debug_settings)
 	game_manager.setup(player.health, wave_manager)
+	noise_manager.setup($EnemyContainer, game_manager, debug_settings)
+	player.componente_ataque.configure_noise(noise_manager)
 	upgrades.setup(player.health, player.componente_ataque, player.costo_movimiento, player, game_manager)
 	weapon_upgrades.setup(inventory, equipment, game_manager)
 	weapon_repairs.setup(inventory, equipment, game_manager)
@@ -49,6 +55,7 @@ func _ready() -> void:
 	hud.set_weapon_repairs(weapon_repairs)
 	hud.set_ammo_manager(ammo_manager)
 	hud.set_quest_manager(quest_manager)
+	hud.set_minimap_sources(player, $EnemyContainer, WORLD_BOUNDS.RECT)
 	# El panel visual solo solicita el cierre; Main mantiene la autoridad sobre
 	# el modal y la transición de GameManager. Esto unifica clic y tecla B.
 	hud.upgrade_shop.close_requested.connect(_on_upgrade_shop_close_requested)
@@ -109,13 +116,16 @@ func _input(event: InputEvent) -> void:
 	var is_inventory := event.is_action_pressed("toggle_inventory")
 	var is_shop := event.is_action_pressed("toggle_upgrade_shop")
 	var is_quests := event.is_action_pressed("toggle_quests")
+	var is_minimap := event.is_action_pressed("toggle_minimap")
 	var is_cancel := event.is_action_pressed("ui_cancel")
-	if not is_inventory and not is_shop and not is_quests and not is_cancel:
+	if not is_inventory and not is_shop and not is_quests and not is_minimap and not is_cancel:
 		return
 	if event is InputEventKey and event.echo:
 		return
 
-	if is_inventory:
+	if is_minimap:
+		hud.minimap.visible = not hud.minimap.visible
+	elif is_inventory:
 		_handle_inventory_input()
 	elif is_shop:
 		_handle_shop_input()
@@ -262,6 +272,9 @@ func restore_from_save(data: Dictionary) -> Dictionary:
 	player_node.health.current_health = clampf(float(health_data.current), 0.0, player_node.health.max_health)
 	player_node.health.is_dead = false
 	player_node.health.health_changed.emit(player_node.health.current_health, player_node.health.max_health)
+	var saved_position = game.get("player_position", null)
+	if saved_position is Dictionary:
+		player_node.global_position = WORLD_BOUNDS.clamp_position(Vector2(float(saved_position.x), float(saved_position.y)))
 	if not effects_restore(game.temporary_effects): return {"success": false, "error": "effect_restore_failed"}
 	if not wave_manager.restore_statistics(int(game.wave.current), int(game.wave.kills)):
 		return {"success": false, "error": "wave_restore_failed"}

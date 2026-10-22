@@ -17,4 +17,5 @@ attack_range = 500.0
 cooldown = 0.35
 combat_type = 2
 projectile_speed = 700.0
+noise_radius = 250.0
 cost_config = SubResource("PistolCost")

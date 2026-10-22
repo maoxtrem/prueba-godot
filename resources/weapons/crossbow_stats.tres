@@ -15,4 +15,6 @@ damage = 25.0
 attack_range = 400.0
 cooldown = 1.2
 combat_type = 2
+projectile_speed = 500.0
+noise_radius = 100.0
 cost_config = SubResource("CrossbowCost")

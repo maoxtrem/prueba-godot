@@ -1,8 +1,11 @@
 
 extends CharacterBody2D
 
+const WORLD_BOUNDS = preload("res://systems/world/world_bounds.gd")
+
 @export var velocidad: float = 200.0
 @export var costo_por_pixel: float = 0.01
+@export var world_bounds: Rect2 = WORLD_BOUNDS.RECT
 
 @onready var health: HealthComponent = $HealthComponent
 @onready var barra_vida: ProgressBar = $LifeBars
@@ -48,6 +51,7 @@ func _physics_process(_delta: float) -> void:
 
 	var posicion_anterior := global_position
 	move_and_slide()
+	global_position = WORLD_BOUNDS.clamp_position(global_position)
 
 	var distancia := global_position.distance_to(
 		posicion_anterior

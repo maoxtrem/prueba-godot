@@ -15,4 +15,5 @@ damage = 8.0
 attack_range = 75.0
 cooldown = 0.25
 max_durability = 100.0
+noise_radius = 30.0
 cost_config = SubResource("WeaponCostConfig_vital_dagger")

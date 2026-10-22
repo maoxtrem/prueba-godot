@@ -25,6 +25,7 @@ var estadisticas_arma: WeaponStats
 var arma_instance: WeaponInstance
 var ammo_manager: AmmoManager
 var game_manager: GameManager
+var noise_manager
 
 signal weapon_durability_changed(instance: WeaponInstance, current: float, maximum: float)
 signal weapon_broken(instance: WeaponInstance)
@@ -54,6 +55,9 @@ func aplicar_instancia_arma(instance: WeaponInstance) -> void:
 func configure_ranged(ammo: AmmoManager, manager: GameManager = null) -> void:
 	ammo_manager = ammo
 	game_manager = manager
+
+func configure_noise(manager) -> void:
+	noise_manager = manager
 
 func is_ranged_weapon() -> bool:
 	return estadisticas_arma != null and estadisticas_arma.is_valid() and estadisticas_arma.combat_type == WeaponStats.CombatType.RANGED and arma_instance != null
@@ -152,7 +156,7 @@ func atacar(
 			objetivo.recibir_dano(dano_efectivo)
 		if arma_instance != null and not arma_instance.consume_durability():
 			return false
-
+	_emit_attack_noise(origen, &"melee_attack")
 	return true
 
 func disparar(origen: Node2D, direccion: Vector2) -> bool:
@@ -191,7 +195,16 @@ func disparar(origen: Node2D, direccion: Vector2) -> bool:
 	parent.add_child(projectile)
 	projectile.global_position = origen.global_position
 	tiempo_restante = tiempo_recarga_efectivo
+	_emit_attack_noise(origen, &"ranged_attack")
 	return true
+
+func _emit_attack_noise(origen: Node2D, cause: StringName) -> void:
+	if noise_manager == null or not is_instance_valid(origen):
+		return
+	var radius := 0.0
+	if estadisticas_arma != null and estadisticas_arma.is_valid():
+		radius = estadisticas_arma.noise_radius
+	noise_manager.emit_noise(origen.global_position, radius, origen, cause)
 
 func _can_pay_health(amount: float) -> bool:
 	if amount <= 0.0:

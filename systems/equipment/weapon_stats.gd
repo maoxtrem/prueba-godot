@@ -14,6 +14,7 @@ enum CombatType {
 @export var combat_type: CombatType = CombatType.MELEE_SHORT
 @export_range(0.0, 999999.0, 1.0) var projectile_speed: float = 0.0
 @export_range(0.0, 999999.0, 0.1) var max_durability: float = 0.0
+@export_range(0.0, 999999.0, 1.0) var noise_radius: float = 0.0
 @export var cost_config: WeaponCostConfig
 
 
@@ -25,6 +26,7 @@ func validate() -> Dictionary:
 		and cooldown > 0.0
 		and projectile_speed >= 0.0
 		and max_durability >= 0.0
+		and noise_radius >= 0.0
 	):
 		return {"success": false, "error": "invalid_base_stats"}
 	if cost_config == null:

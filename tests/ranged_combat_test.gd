@@ -29,8 +29,8 @@ func _run() -> void:
 	var instance: WeaponInstance = inventory.get_slots()[0].weapon_instance
 	_check(equipment.equip_item("weapon_crossbow", instance.instance_id).success, "equipar ballesta")
 	game_manager.current_state = GameManager.GameState.PLAYING
-	player.global_position = Vector2.ZERO
-	target.global_position = Vector2(100.0, 0.0)
+	player.global_position = Vector2(48.0, 48.0)
+	target.global_position = Vector2(148.0, 48.0)
 
 	var ammo_before := ammo.get_available("crossbow_bolt")
 	_check(attack.disparar(player, Vector2.RIGHT), "aceptar disparo válido")
@@ -43,7 +43,7 @@ func _run() -> void:
 	_check(not attack.disparar(player, Vector2.RIGHT), "rechazar disparo durante cooldown")
 	_check(is_equal_approx(target.received_damage, after_hit), "no duplicar impacto")
 	attack.tiempo_restante = 0.0
-	target.global_position = Vector2(1000.0, 0.0)
+	target.global_position = Vector2(1000.0, 48.0)
 	var ammo_before_miss := ammo.get_available("crossbow_bolt")
 	_check(attack.disparar(player, Vector2.RIGHT), "aceptar disparo que puede fallar")
 	_check(ammo.get_available("crossbow_bolt") == ammo_before_miss - 1, "consumir munición aunque falle")
@@ -54,7 +54,7 @@ func _run() -> void:
 	inventory.add_item(load("res://resources/items/crossbow_bolt.tres"), 1)
 	attack.tiempo_restante = 0.0
 	game_manager.current_state = GameManager.GameState.PLAYING
-	target.global_position = Vector2(100.0, 0.0)
+	target.global_position = Vector2(148.0, 48.0)
 	var mouse_event := InputEventMouseButton.new()
 	mouse_event.button_index = MOUSE_BUTTON_LEFT
 	mouse_event.position = Vector2(100.0, 0.0)

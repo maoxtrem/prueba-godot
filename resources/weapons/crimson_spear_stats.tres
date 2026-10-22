@@ -18,4 +18,5 @@ attack_range = 180.0
 cooldown = 0.9
 combat_type = 1
 max_durability = 60.0
+noise_radius = 80.0
 cost_config = SubResource("WeaponCostConfig_crimson_spear")

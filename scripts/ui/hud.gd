@@ -20,6 +20,7 @@ signal restart_requested
 @onready var quest_ui: QuestUI = $QuestUI
 @onready var pause_ui: PauseUI = $PauseUI
 @onready var between_waves_ui: BetweenWavesUI = $BetweenWavesUI
+@onready var minimap = $Interface/Minimap
 
 
 # ==========================================
@@ -150,3 +151,7 @@ func set_ammo_manager(manager: AmmoManager) -> void:
 
 func set_quest_manager(quests: QuestManager) -> void:
 	quest_ui.set_manager(quests)
+
+
+func set_minimap_sources(player: Node2D, enemy_container: Node2D, world_rect: Rect2) -> void:
+	minimap.set_sources(player, enemy_container, world_rect)

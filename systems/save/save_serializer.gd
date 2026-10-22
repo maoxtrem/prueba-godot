@@ -1,6 +1,8 @@
 extends RefCounted
 class_name SaveSerializer
 
+const WORLD_BOUNDS = preload("res://systems/world/world_bounds.gd")
+
 const SCHEMA_VERSION := 1
 const MAX_WEAPON_LEVEL := 3
 
@@ -19,6 +21,7 @@ func serialize_game(main_node: Node, save_id: String) -> Dictionary:
 		"game": {
 			"game_state": int(main_node.get_node("GameManager").current_state),
 			"health": {"current": player.health.current_health, "maximum": player.health.max_health},
+			"player_position": {"x": player.global_position.x, "y": player.global_position.y},
 			"inventory": _serialize_inventory(inventory),
 			"equipment": _serialize_equipment(equipment),
 			"upgrades": _serialize_upgrades(upgrades),
@@ -43,6 +46,12 @@ func validate(data: Variant) -> Dictionary:
 		return _invalid("invalid_health")
 	if float(health.get("maximum", 0)) <= 0.0 or float(health.get("current", -1)) < 0.0 or float(health.get("current", 0)) > float(health.get("maximum", 0)):
 		return _invalid("invalid_health_values")
+	var player_position = game.get("player_position", null)
+	if player_position != null:
+		if not player_position is Dictionary or not _is_number(player_position.get("x", null)) or not _is_number(player_position.get("y", null)):
+			return _invalid("invalid_player_position")
+		if not WORLD_BOUNDS.contains_position(Vector2(float(player_position.x), float(player_position.y))):
+			return _invalid("player_position_out_of_bounds")
 	var wave = game.get("wave", null)
 	if not wave is Dictionary or int(wave.get("current", -1)) < 0 or int(wave.get("kills", -1)) < 0:
 		return _invalid("invalid_wave_state")

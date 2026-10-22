@@ -15,4 +15,5 @@ damage = 18.0
 attack_range = 100.0
 cooldown = 0.6
 max_durability = 80.0
+noise_radius = 60.0
 cost_config = SubResource("WeaponCostConfig_rusty_sword")
